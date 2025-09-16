@@ -1,0 +1,148 @@
+<div class="financial-dashboard">
+  <div class="dashboard-header">
+    <h1>Financial Management</h1>
+    <p class="subtitle">Monitor contract payments, invoices, and financial performance</p>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <mat-spinner></mat-spinner>
+    <p>Loading financial data...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-container">
+    <mat-icon color="warn">error</mat-icon>
+    <p>{{ error }}</p>
+    <button mat-raised-button color="primary" (click)="loadDashboardData()">
+      Retry
+    </button>
+  </div>
+
+  <!-- Dashboard Content -->
+  <div *ngIf="!loading && !error" class="dashboard-content">
+    <!-- Financial Summary Cards -->
+    <div class="summary-cards" *ngIf="summary">
+      <mat-card class="summary-card">
+        <mat-card-content>
+          <div class="card-header">
+            <mat-icon color="primary">account_balance_wallet</mat-icon>
+            <span class="card-title">Total Contract Value</span>
+          </div>
+          <div class="card-value">{{ formatCurrency(summary.totalContractValue) }}</div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="summary-card">
+        <mat-card-content>
+          <div class="card-header">
+            <mat-icon color="accent">payments</mat-icon>
+            <span class="card-title">Paid Amount</span>
+          </div>
+          <div class="card-value">{{ formatCurrency(summary.totalPaidAmount) }}</div>
+          <div class="card-subtitle">
+            {{ ((summary.totalPaidAmount / summary.totalScheduledPayments) * 100 | number:'1.1-1') }}% of scheduled
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="summary-card">
+        <mat-card-content>
+          <div class="card-header">
+            <mat-icon color="warn">schedule</mat-icon>
+            <span class="card-title">Pending Payments</span>
+          </div>
+          <div class="card-value">{{ formatCurrency(summary.totalPendingPayments) }}</div>
+          <div class="card-subtitle">{{ summary.upcomingPaymentsCount }} upcoming</div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="summary-card">
+        <mat-card-content>
+          <div class="card-header">
+            <mat-icon color="warn">warning</mat-icon>
+            <span class="card-title">Overdue Payments</span>
+          </div>
+          <div class="card-value">{{ formatCurrency(summary.totalOverduePayments) }}</div>
+          <div class="card-subtitle">{{ summary.overduePaymentsCount }} overdue</div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+      <h2>Quick Actions</h2>
+      <div class="action-buttons">
+        <button mat-raised-button color="primary" routerLink="/financial/payments">
+          <mat-icon>schedule</mat-icon>
+          View Payment Schedules
+        </button>
+        <button mat-raised-button color="accent" routerLink="/financial/invoices">
+          <mat-icon>receipt</mat-icon>
+          Manage Invoices
+        </button>
+        <button mat-stroked-button routerLink="/financial/penalties">
+          <mat-icon>gavel</mat-icon>
+          View Penalties
+        </button>
+      </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="recent-activity">
+      <!-- Upcoming Payments -->
+      <mat-card class="activity-card">
+        <mat-card-header>
+          <mat-card-title>Upcoming Payments</mat-card-title>
+          <button mat-icon-button routerLink="/financial/payments">
+            <mat-icon>arrow_forward</mat-icon>
+          </button>
+        </mat-card-header>
+        <mat-card-content>
+          <div *ngIf="upcomingPayments.length === 0" class="no-data">
+            <mat-icon>event_available</mat-icon>
+            <p>No upcoming payments</p>
+          </div>
+          <div *ngFor="let payment of upcomingPayments" class="payment-item">
+            <div class="payment-info">
+              <span class="contract-title">{{ payment.contractTitle }}</span>
+              <span class="payment-description">{{ payment.description }}</span>
+            </div>
+            <div class="payment-details">
+              <span class="amount">{{ formatCurrency(payment.scheduledAmount) }}</span>
+              <mat-chip [color]="getPaymentUrgencyColor(getPaymentUrgency(payment.daysUntilDue!))" selected>
+                {{ payment.daysUntilDue! < 0 ? 'Overdue' : payment.daysUntilDue + ' days' }}
+              </mat-chip>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Pending Invoices -->
+      <mat-card class="activity-card">
+        <mat-card-header>
+          <mat-card-title>Pending Invoices</mat-card-title>
+          <button mat-icon-button routerLink="/financial/invoices">
+            <mat-icon>arrow_forward</mat-icon>
+          </button>
+        </mat-card-header>
+        <mat-card-content>
+          <div *ngIf="pendingInvoices.length === 0" class="no-data">
+            <mat-icon>inbox</mat-icon>
+            <p>No pending invoices</p>
+          </div>
+          <div *ngFor="let invoice of pendingInvoices" class="invoice-item">
+            <div class="invoice-info">
+              <span class="invoice-number">{{ invoice.invoiceNumber }}</span>
+              <span class="contract-title">{{ invoice.contractTitle }}</span>
+            </div>
+            <div class="invoice-details">
+              <span class="amount">{{ formatCurrency(invoice.amount) }}</span>
+              <mat-chip color="accent" selected>{{ invoice.status }}</mat-chip>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>

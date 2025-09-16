@@ -1,0 +1,140 @@
+.dashboard-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.loading-container, .error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  text-align: center;
+  
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 16px;
+  }
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  
+  h1 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 500;
+  }
+}
+
+.tab-content {
+  padding: 24px 0;
+}
+
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.summary-card {
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    
+    .card-title {
+      font-weight: 500;
+      color: rgba(0, 0, 0, 0.6);
+    }
+  }
+  
+  .card-value {
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: #1976d2;
+  }
+  
+  &.critical .card-value {
+    color: #d32f2f;
+  }
+  
+  &.high .card-value {
+    color: #f57c00;
+  }
+  
+  &.completed .card-value {
+    color: #388e3c;
+  }
+  
+  &.overdue .card-value {
+    color: #d32f2f;
+  }
+}
+
+.chart-card {
+  margin-bottom: 24px;
+  
+  .category-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .category-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    
+    &:last-child {
+      border-bottom: none;
+    }
+    
+    .category-name {
+      font-weight: 500;
+    }
+    
+    .category-count {
+      background: #e3f2fd;
+      color: #1976d2;
+      padding: 4px 12px;
+      border-radius: 16px;
+      font-weight: 600;
+      min-width: 32px;
+      text-align: center;
+    }
+  }
+}
+
+.quick-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-top: 32px;
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 16px;
+  }
+  
+  .summary-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .dashboard-header {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+}

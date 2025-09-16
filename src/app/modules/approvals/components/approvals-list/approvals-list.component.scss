@@ -1,0 +1,120 @@
+.approvals-container {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: 32px;
+  text-align: center;
+
+  h1 {
+    margin: 0 0 8px 0;
+    font-size: 2rem;
+    font-weight: 500;
+  }
+
+  .subtitle {
+    margin: 0;
+    color: #666;
+    font-size: 1.1rem;
+  }
+}
+
+.loading-container, .error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 16px;
+}
+
+.table-card {
+  .header-actions {
+    margin-left: auto;
+
+    .search-field {
+      width: 300px;
+    }
+  }
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.approvals-table {
+  width: 100%;
+
+  .contract-number {
+    font-weight: 500;
+    color: #1976d2;
+  }
+
+  .contract-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .title {
+      font-weight: 500;
+    }
+
+    .step-info {
+      font-size: 0.9rem;
+      color: #666;
+    }
+  }
+
+  .contract-value {
+    font-weight: 600;
+    color: #2e7d32;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+}
+
+.no-data {
+  text-align: center;
+  padding: 64px 32px;
+  color: #666;
+
+  mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    margin-bottom: 16px;
+  }
+
+  h3 {
+    margin: 0 0 8px 0;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .approvals-container {
+    padding: 16px;
+  }
+
+  .table-card .header-actions .search-field {
+    width: 100%;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    gap: 4px;
+
+    button {
+      width: 100%;
+    }
+  }
+}

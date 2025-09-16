@@ -1,0 +1,66 @@
+<h2 mat-dialog-title>
+    <mat-icon>article</mat-icon>
+    Template Library
+  </h2>
+  
+  <div mat-dialog-content class="dialog-content">
+    <!-- Search and Filter -->
+    <div class="search-filter-section">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search templates...</mat-label>
+        <input matInput [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+  
+      <div class="category-chips">
+        <mat-chip-listbox>
+          <mat-chip-option
+            *ngFor="let category of categories"
+            [selected]="selectedCategory === category"
+            (click)="onCategoryChange(category)"
+          >
+            {{ category }}
+          </mat-chip-option>
+        </mat-chip-listbox>
+      </div>
+    </div>
+  
+    <!-- Templates List -->
+    <div class="templates-container">
+      <div *ngFor="let template of filteredTemplates" class="template-card">
+        <mat-card class="template-item">
+          <mat-card-content>
+            <div class="template-header">
+              <div class="template-title-section">
+                <mat-icon class="template-icon">{{ getTemplateIcon(template.category) }}</mat-icon>
+                <h3 class="template-title">{{ template.name }}</h3>
+              </div>
+              <mat-chip class="category-chip" color="primary">{{ template.category }}</mat-chip>
+            </div>
+  
+            <p class="template-description">{{ template.description }}</p>
+  
+            <div class="template-footer">
+              <div class="template-info">
+                <span class="block-count">{{ template.blocks.length }} blocks</span>
+              </div>
+  
+              <button mat-raised-button color="primary" (click)="applyTemplate(template)">
+                Use Template
+              </button>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+  
+      <!-- Empty State -->
+      <div *ngIf="filteredTemplates.length === 0" class="empty-state">
+        <mat-icon class="empty-icon">article</mat-icon>
+        <p>No templates found</p>
+      </div>
+    </div>
+  </div>
+  
+  <div mat-dialog-actions class="dialog-actions">
+    <button mat-button (click)="close()">Close</button>
+  </div>

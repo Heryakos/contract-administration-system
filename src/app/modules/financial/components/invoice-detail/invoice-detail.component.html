@@ -1,0 +1,61 @@
+<div class="invoice-detail-container">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <mat-spinner></mat-spinner>
+    <p>Loading invoice details...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-container">
+    <mat-icon color="warn">error</mat-icon>
+    <p>{{ error }}</p>
+  </div>
+
+  <!-- Invoice Details -->
+  <div *ngIf="invoice && !loading" class="invoice-content">
+    <div class="invoice-header">
+      <div class="header-info">
+        <h1>Invoice {{ invoice.invoiceNumber }}</h1>
+        <mat-chip [color]="getStatusColor(invoice.status)" selected>
+          {{ invoice.status }}
+        </mat-chip>
+      </div>
+    </div>
+
+    <div class="invoice-details">
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>Invoice Information</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="label">Contract:</span>
+              <span class="value">{{ invoice.contractTitle }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Amount:</span>
+              <span class="value highlight">{{ formatCurrency(invoice.amount) }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Invoice Date:</span>
+              <span class="value">{{ invoice.invoiceDate | date:'mediumDate' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Submitted By:</span>
+              <span class="value">{{ invoice.submittedBy || 'N/A' }}</span>
+            </div>
+            <div class="info-item" *ngIf="invoice.approvedBy">
+              <span class="label">Approved By:</span>
+              <span class="value">{{ invoice.approvedBy }}</span>
+            </div>
+            <div class="info-item" *ngIf="invoice.paidDate">
+              <span class="label">Paid Date:</span>
+              <span class="value">{{ invoice.paidDate | date:'mediumDate' }}</span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>

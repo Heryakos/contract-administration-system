@@ -1,0 +1,151 @@
+<div class="contract-detail-container">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <mat-spinner></mat-spinner>
+    <p>Loading contract details...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-container">
+    <mat-icon color="warn">error</mat-icon>
+    <p>{{ error }}</p>
+    <button mat-raised-button color="primary" (click)="navigateToContracts()">
+      Back to Contracts
+    </button>
+  </div>
+
+  <!-- Contract Details -->
+  <div *ngIf="contract && !loading" class="contract-content">
+    <!-- Header -->
+    <div class="contract-header">
+      <div class="header-info">
+        <h1>{{ contract.contractTitle }}</h1>
+        <p class="contract-number">Contract #{{ contract.contractNumber }}</p>
+        <mat-chip-set>
+          <mat-chip [color]="getStatusColor(contract.status)" selected>
+            {{ contract.status | titlecase }}
+          </mat-chip>
+        </mat-chip-set>
+      </div>
+      <div class="header-actions">
+        <button mat-raised-button color="primary" (click)="editContract()">
+          <mat-icon>edit</mat-icon>
+          Edit Contract
+        </button>
+        <button mat-stroked-button color="warn" (click)="deleteContract()">
+          <mat-icon>delete</mat-icon>
+          Delete
+        </button>
+      </div>
+    </div>
+
+    <!-- Contract Information Cards -->
+    <div class="info-grid">
+      <!-- Basic Information -->
+      <mat-card class="info-card">
+        <mat-card-header>
+          <mat-card-title>Basic Information</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="info-row">
+            <span class="label">Contract Type:</span>
+            <span class="value">{{ contract.contractType || 'N/A' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Category:</span>
+            <span class="value">{{ contract.category || 'N/A' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Vendor:</span>
+            <span class="value">{{ contract.vendorName || 'N/A' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Description:</span>
+            <span class="value">{{ contract.description || 'N/A' }}</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Financial Information -->
+      <mat-card class="info-card">
+        <mat-card-header>
+          <mat-card-title>Financial Details</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="info-row">
+            <span class="label">Contract Value:</span>
+            <span class="value highlight">{{ formatCurrency(contract.contractValue || 0) }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Currency:</span>
+            <span class="value">{{ contract.currency }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Payment Terms:</span>
+            <span class="value">{{ 'N/A' }}</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Timeline Information -->
+      <mat-card class="info-card">
+        <mat-card-header>
+          <mat-card-title>Timeline</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="info-row">
+            <span class="label">Start Date:</span>
+            <span class="value">{{ contract.startDate | date:'mediumDate' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">End Date:</span>
+            <span class="value">{{ contract.endDate | date:'mediumDate' }}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Duration:</span>
+            <span class="value">{{ contract.daysToExpiry }} days</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Auto Renewal:</span>
+            <span class="value">{{ 'N/A' }}</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Document Management -->
+      <mat-card class="info-card full-width">
+        <mat-card-header>
+          <mat-card-title>Documents</mat-card-title>
+          <button mat-icon-button>
+            <mat-icon>add</mat-icon>
+          </button>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="documents-list">
+            <div class="no-documents">
+              <mat-icon>folder_open</mat-icon>
+              <p>No documents uploaded</p>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Audit Trail -->
+    <mat-card class="audit-card">
+      <mat-card-header>
+        <mat-card-title>Audit Trail</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="audit-item">
+          <span class="audit-date">{{ contract.createdDate | date:'medium' }}</span>
+          <span class="audit-action">Contract created by {{ contract.createdBy || 'System' }}</span>
+        </div>
+        <div class="audit-item" *ngIf="contract.modifiedDate && contract.modifiedDate !== contract.createdDate">
+          <span class="audit-date">{{ contract.modifiedDate | date:'medium' }}</span>
+          <span class="audit-action">Contract updated by {{ contract.modifiedBy || 'System' }}</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

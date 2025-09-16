@@ -1,0 +1,100 @@
+<div class="approval-detail-container">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <mat-spinner></mat-spinner>
+    <p>Loading approval details...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-container">
+    <mat-icon color="warn">error</mat-icon>
+    <p>{{ error }}</p>
+  </div>
+
+  <!-- Approval Details -->
+  <div *ngIf="approvalStatus && !loading" class="approval-content">
+    <!-- Header -->
+    <div class="approval-header">
+      <div class="header-info">
+        <h1>{{ approvalStatus.contractTitle }}</h1>
+        <mat-chip-set>
+          <mat-chip [color]="getOverallStatusColor(approvalStatus.overallStatus)" selected>
+            {{ approvalStatus.overallStatus }}
+          </mat-chip>
+        </mat-chip-set>
+      </div>
+    </div>
+
+    <!-- Current Step Info -->
+    <mat-card *ngIf="approvalStatus.currentStepName" class="current-step-card">
+      <mat-card-header>
+        <mat-card-title>Current Step</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="current-step-info">
+          <mat-icon color="accent">schedule</mat-icon>
+          <div>
+            <h3>{{ approvalStatus.currentStepName }}</h3>
+            <p>Step {{ approvalStatus.currentStepOrder }} - Awaiting approval</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Approval Timeline -->
+    <mat-card class="timeline-card">
+      <mat-card-header>
+        <mat-card-title>Approval Timeline</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="approval-timeline">
+          <div *ngFor="let approval of approvalStatus.approvals; let i = index" 
+               class="timeline-item"
+               [class.completed]="approval.status === 'Approved'"
+               [class.rejected]="approval.status === 'Rejected'"
+               [class.pending]="approval.status === 'Pending'">
+            
+            <div class="timeline-marker">
+              <mat-icon *ngIf="approval.status === 'Approved'" color="primary">check_circle</mat-icon>
+              <mat-icon *ngIf="approval.status === 'Rejected'" color="warn">cancel</mat-icon>
+              <mat-icon *ngIf="approval.status === 'Pending'" color="accent">schedule</mat-icon>
+            </div>
+
+            <div class="timeline-content">
+              <div class="step-header">
+                <h3>Step {{ approval.stepOrder }}: {{ approval.stepName }}</h3>
+                <mat-chip [color]="getStatusColor(approval.status)" selected>
+                  {{ approval.status }}
+                </mat-chip>
+              </div>
+
+              <div class="step-details">
+                <div *ngIf="approval.approverName" class="approver-info">
+                  <mat-icon>person</mat-icon>
+                  <span>{{ approval.approverName }}</span>
+                </div>
+
+                <div *ngIf="approval.approvalDate" class="approval-date">
+                  <mat-icon>event</mat-icon>
+                  <span>{{ approval.approvalDate | date:'medium' }}</span>
+                </div>
+
+                <div *ngIf="!approval.approvalDate" class="created-date">
+                  <mat-icon>schedule</mat-icon>
+                  <span>Created {{ approval.createdDate | date:'medium' }}</span>
+                </div>
+
+                <div *ngIf="approval.comments" class="comments">
+                  <mat-icon>comment</mat-icon>
+                  <span>{{ approval.comments }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div *ngIf="i < approvalStatus.approvals.length - 1" class="timeline-connector"></div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

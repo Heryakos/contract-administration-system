@@ -1,0 +1,21 @@
+<mat-card class="preview-card">
+    <mat-card-header>
+      <mat-card-title class="preview-title">
+        Live Preview
+        <div class="preview-badges">
+          <mat-chip *ngIf="metadata.version" color="accent" class="version-chip">
+            v{{ metadata.version }}
+          </mat-chip>
+          <mat-chip *ngIf="customization.features?.trackChanges" class="tracking-chip">
+            Tracking Changes
+          </mat-chip>
+        </div>
+      </mat-card-title>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <div class="preview-container" [ngStyle]="previewStyle">
+        <div [innerHTML]="previewHtml"></div>
+      </div>
+    </mat-card-content>
+  </mat-card>

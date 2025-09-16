@@ -1,0 +1,142 @@
+<div class="risks-list-container">
+  <div class="page-header">
+    <h1>Risk Register</h1>
+    <button mat-raised-button color="primary" (click)="openCreateDialog()">
+      <mat-icon>add</mat-icon>
+      Add Risk
+    </button>
+  </div>
+
+  <!-- Filters -->
+  <mat-card class="filters-card">
+    <mat-card-content>
+      <div class="filters-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Search</mat-label>
+          <input matInput [(ngModel)]="searchTerm" (keyup)="applyFilter()" placeholder="Search risks...">
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Category</mat-label>
+          <mat-select [(value)]="selectedCategory" (selectionChange)="onFilterChange()">
+            <mat-option value="">All Categories</mat-option>
+            <mat-option *ngFor="let category of categories" [value]="category">
+              {{ category }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Status</mat-label>
+          <mat-select [(value)]="selectedStatus" (selectionChange)="onFilterChange()">
+            <mat-option value="">All Statuses</mat-option>
+            <mat-option *ngFor="let status of statuses" [value]="status">
+              {{ status }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <button mat-stroked-button (click)="clearFilters()">
+          <mat-icon>clear</mat-icon>
+          Clear Filters
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <mat-spinner></mat-spinner>
+    <p>Loading risks...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-container">
+    <mat-icon color="warn">error</mat-icon>
+    <p>{{ error }}</p>
+    <button mat-raised-button color="primary" (click)="loadRisks()">
+      <mat-icon>refresh</mat-icon>
+      Retry
+    </button>
+  </div>
+
+  <!-- Risks Table -->
+  <mat-card *ngIf="!loading && !error" class="table-card">
+    <table mat-table [dataSource]="dataSource" matSort class="risks-table">
+      <!-- Risk Title Column -->
+      <ng-container matColumnDef="riskTitle">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Risk Title</th>
+        <td mat-cell *matCellDef="let risk">
+          <div class="risk-title">
+            <strong>{{ risk.riskTitle }}</strong>
+            <div class="risk-description" *ngIf="risk.riskDescription">
+              {{ risk.riskDescription }}
+            </div>
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Contract Column -->
+      <ng-container matColumnDef="contractTitle">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Contract</th>
+        <td mat-cell *matCellDef="let risk">{{ risk.contractTitle || 'N/A' }}</td>
+      </ng-container>
+
+      <!-- Category Column -->
+      <ng-container matColumnDef="riskCategory">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Category</th>
+        <td mat-cell *matCellDef="let risk">
+          <mat-chip>{{ risk.riskCategory }}</mat-chip>
+        </td>
+      </ng-container>
+
+      <!-- Risk Score Column -->
+      <ng-container matColumnDef="riskScore">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Risk Score</th>
+        <td mat-cell *matCellDef="let risk">
+          <mat-chip [color]="getRiskLevelColor(risk.riskScore)">
+            {{ risk.riskScore }} ({{ getRiskLevel(risk.riskScore) }})
+          </mat-chip>
+        </td>
+      </ng-container>
+
+      <!-- Status Column -->
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+        <td mat-cell *matCellDef="let risk">
+          <mat-chip [color]="risk.status === 'Closed' ? 'primary' : risk.status === 'Mitigated' ? 'accent' : ''">
+            {{ risk.status }}
+          </mat-chip>
+        </td>
+      </ng-container>
+
+      <!-- Assigned To Column -->
+      <ng-container matColumnDef="assignedToName">
+        <th mat-header-cell *matHeaderCellDef>Assigned To</th>
+        <td mat-cell *matCellDef="let risk">{{ risk.assignedToName || 'Unassigned' }}</td>
+      </ng-container>
+
+      <!-- Last Updated Column -->
+      <ng-container matColumnDef="lastUpdated">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Last Updated</th>
+        <td mat-cell *matCellDef="let risk">{{ risk.lastUpdated | date:'short' }}</td>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let risk">
+          <button mat-icon-button (click)="openEditDialog(risk)" matTooltip="Edit Risk">
+            <mat-icon>edit</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+
+    <mat-paginator [pageSizeOptions]="[10, 25, 50, 100]" showFirstLastButtons></mat-paginator>
+  </mat-card>
+</div>

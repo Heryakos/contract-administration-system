@@ -1,0 +1,209 @@
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h1>Dashboard</h1>
+    <p>Overview of your contract portfolio</p>
+  </div>
+
+  <div class="dashboard-content" *ngIf="!loading">
+    <!-- Summary Cards -->
+    <div class="summary-grid" *ngIf="summary$ | async as summary">
+      <mat-card class="summary-card">
+        <mat-card-content>
+          <div class="summary-item">
+            <div class="summary-icon total">
+              <mat-icon>description</mat-icon>
+            </div>
+            <div class="summary-details">
+              <h3>{{ summary.totalContracts }}</h3>
+              <p>Total Contracts</p>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="summary-card">
+        <mat-card-content>
+          <div class="summary-item">
+            <div class="summary-icon active">
+              <mat-icon>check_circle</mat-icon>
+            </div>
+            <div class="summary-details">
+              <h3>{{ summary.activeContracts }}</h3>
+              <p>Active Contracts</p>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="summary-card">
+        <mat-card-content>
+          <div class="summary-item">
+            <div class="summary-icon warning">
+              <mat-icon>schedule</mat-icon>
+            </div>
+            <div class="summary-details">
+              <h3>{{ summary.expiringContracts }}</h3>
+              <p>Expiring Soon</p>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="summary-card">
+        <mat-card-content>
+          <div class="summary-item">
+            <div class="summary-icon value">
+              <mat-icon>attach_money</mat-icon>
+            </div>
+            <div class="summary-details">
+              <h3>{{ formatCurrency(summary.totalValue) }}</h3>
+              <p>Total Value</p>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="summary-card">
+        <mat-card-content>
+          <div class="summary-item">
+            <div class="summary-icon pending">
+              <mat-icon>pending_actions</mat-icon>
+            </div>
+            <div class="summary-details">
+              <h3>{{ summary.pendingApprovals }}</h3>
+              <p>Pending Approvals</p>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="summary-card">
+        <mat-card-content>
+          <div class="summary-item">
+            <div class="summary-icon overdue">
+              <mat-icon>warning</mat-icon>
+            </div>
+            <div class="summary-details">
+              <h3>{{ summary.overdueObligations }}</h3>
+              <p>Overdue Tasks</p>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Recent Contracts and Expiring Contracts -->
+    <div class="dashboard-tables">
+      <div class="table-section">
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Recent Contracts</mat-card-title>
+            <mat-card-subtitle>Latest contract activities</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="table-container">
+              <table mat-table [dataSource]="recentContracts" class="contracts-table">
+                <ng-container matColumnDef="contractNumber">
+                  <th mat-header-cell *matHeaderCellDef>Contract #</th>
+                  <td mat-cell *matCellDef="let contract">
+                    <a [routerLink]="['/contracts', contract.contractID]" class="contract-link">
+                      {{ contract.contractNumber }}
+                    </a>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="title">
+                  <th mat-header-cell *matHeaderCellDef>Title</th>
+                  <td mat-cell *matCellDef="let contract">{{ contract.contractTitle }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="vendor">
+                  <th mat-header-cell *matHeaderCellDef>Vendor</th>
+                  <td mat-cell *matCellDef="let contract">{{ contract.vendorName || 'N/A' }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="status">
+                  <th mat-header-cell *matHeaderCellDef>Status</th>
+                  <td mat-cell *matCellDef="let contract">
+                    <span [class]="getStatusClass(contract.status)">{{ contract.status }}</span>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="value">
+                  <th mat-header-cell *matHeaderCellDef>Value</th>
+                  <td mat-cell *matCellDef="let contract">
+                    {{ contract.contractValue ? formatCurrency(contract.contractValue) : 'N/A' }}
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="['contractNumber', 'title', 'vendor', 'status', 'value']"></tr>
+                <tr mat-row *matRowDef="let row; columns: ['contractNumber', 'title', 'vendor', 'status', 'value'];"></tr>
+              </table>
+            </div>
+            <div class="table-actions">
+              <button mat-button color="primary" routerLink="/contracts">View All Contracts</button>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <div class="table-section">
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Expiring Contracts</mat-card-title>
+            <mat-card-subtitle>Contracts expiring within 30 days</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="table-container">
+              <table mat-table [dataSource]="expiringContracts" class="contracts-table">
+                <ng-container matColumnDef="contractNumber">
+                  <th mat-header-cell *matHeaderCellDef>Contract #</th>
+                  <td mat-cell *matCellDef="let contract">
+                    <a [routerLink]="['/contracts', contract.contractID]" class="contract-link">
+                      {{ contract.contractNumber }}
+                    </a>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="title">
+                  <th mat-header-cell *matHeaderCellDef>Title</th>
+                  <td mat-cell *matCellDef="let contract">{{ contract.contractTitle }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="endDate">
+                  <th mat-header-cell *matHeaderCellDef>End Date</th>
+                  <td mat-cell *matCellDef="let contract">
+                    {{ contract.endDate | date:'shortDate' }}
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="daysLeft">
+                  <th mat-header-cell *matHeaderCellDef>Days Left</th>
+                  <td mat-cell *matCellDef="let contract">
+                    <span class="days-left" [class.urgent]="contract.daysToExpiry <= 7">
+                      {{ contract.daysToExpiry }} days
+                    </span>
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="['contractNumber', 'title', 'endDate', 'daysLeft']"></tr>
+                <tr mat-row *matRowDef="let row; columns: ['contractNumber', 'title', 'endDate', 'daysLeft'];"></tr>
+              </table>
+            </div>
+            <div class="table-actions">
+              <button mat-button color="warn" routerLink="/contracts" [queryParams]="{status: 'expiring'}">
+                View All Expiring
+              </button>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="loading">
+    <mat-spinner></mat-spinner>
+    <p>Loading dashboard data...</p>
+  </div>
+</div>

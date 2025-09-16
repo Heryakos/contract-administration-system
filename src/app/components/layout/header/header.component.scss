@@ -1,0 +1,55 @@
+.header-toolbar {
+  background-color: white;
+  color: #1f2937;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  z-index: 1000;
+}
+
+.header-title {
+  font-weight: 600;
+  font-size: 1.125rem;
+}
+
+.header-spacer {
+  flex: 1 1 auto;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.notification-header {
+  padding: 1rem;
+  
+  h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+}
+
+.user-info {
+  padding: 1rem;
+  min-width: 200px;
+  
+  .user-name {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: #1f2937;
+  }
+  
+  .user-email {
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin-top: 0.25rem;
+  }
+  
+  .user-role {
+    font-size: 0.75rem;
+    color: #1976d2;
+    margin-top: 0.25rem;
+    font-weight: 500;
+  }
+}

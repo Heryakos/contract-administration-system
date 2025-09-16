@@ -1,0 +1,140 @@
+.invoices-container {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: 32px;
+  text-align: center;
+
+  h1 {
+    margin: 0 0 8px 0;
+    font-size: 2rem;
+    font-weight: 500;
+  }
+
+  .subtitle {
+    margin: 0;
+    color: #666;
+    font-size: 1.1rem;
+  }
+}
+
+.loading-container, .error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 16px;
+}
+
+.table-card {
+  .header-actions {
+    margin-left: auto;
+    display: flex;
+    gap: 16px;
+
+    .status-field {
+      width: 200px;
+    }
+
+    .search-field {
+      width: 300px;
+    }
+  }
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.invoices-table {
+  width: 100%;
+
+  .invoice-number {
+    font-weight: 500;
+    color: #1976d2;
+  }
+
+  .contract-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .title {
+      font-weight: 500;
+    }
+
+    .number {
+      font-size: 0.9rem;
+      color: #666;
+    }
+  }
+
+  .amount {
+    font-weight: 600;
+    color: #2e7d32;
+  }
+
+  .date {
+    font-weight: 500;
+  }
+
+  .submitted-by {
+    color: #666;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+}
+
+.no-data {
+  text-align: center;
+  padding: 64px 32px;
+  color: #666;
+
+  mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    margin-bottom: 16px;
+  }
+
+  h3 {
+    margin: 0 0 8px 0;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .invoices-container {
+    padding: 16px;
+  }
+
+  .table-card .header-actions {
+    flex-direction: column;
+    gap: 12px;
+
+    .status-field,
+    .search-field {
+      width: 100%;
+    }
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    gap: 4px;
+
+    button {
+      width: 100%;
+    }
+  }
+}

@@ -1,0 +1,168 @@
+.financial-dashboard {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.dashboard-header {
+  margin-bottom: 32px;
+  text-align: center;
+
+  h1 {
+    margin: 0 0 8px 0;
+    font-size: 2rem;
+    font-weight: 500;
+  }
+
+  .subtitle {
+    margin: 0;
+    color: #666;
+    font-size: 1.1rem;
+  }
+}
+
+.loading-container, .error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 16px;
+}
+
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+
+  .summary-card {
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+
+      .card-title {
+        font-weight: 500;
+        color: #666;
+      }
+    }
+
+    .card-value {
+      font-size: 2rem;
+      font-weight: 600;
+      color: #1976d2;
+      margin-bottom: 8px;
+    }
+
+    .card-subtitle {
+      font-size: 0.9rem;
+      color: #666;
+    }
+  }
+}
+
+.quick-actions {
+  margin-bottom: 32px;
+
+  h2 {
+    margin: 0 0 16px 0;
+    font-size: 1.5rem;
+    font-weight: 500;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+}
+
+.recent-activity {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 24px;
+
+  .activity-card {
+    mat-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .no-data {
+      text-align: center;
+      padding: 32px;
+      color: #666;
+
+      mat-icon {
+        font-size: 48px;
+        width: 48px;
+        height: 48px;
+        margin-bottom: 16px;
+      }
+    }
+
+    .payment-item, .invoice-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #f0f0f0;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      .payment-info, .invoice-info {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        .contract-title, .invoice-number {
+          font-weight: 500;
+        }
+
+        .payment-description {
+          font-size: 0.9rem;
+          color: #666;
+        }
+      }
+
+      .payment-details, .invoice-details {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 8px;
+
+        .amount {
+          font-weight: 600;
+          color: #2e7d32;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .financial-dashboard {
+    padding: 16px;
+  }
+
+  .summary-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-actions .action-buttons {
+    flex-direction: column;
+
+    button {
+      width: 100%;
+    }
+  }
+
+  .recent-activity {
+    grid-template-columns: 1fr;
+  }
+}

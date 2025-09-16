@@ -1,0 +1,42 @@
+<div class="dialog-container">
+  <h2 mat-dialog-title>{{ actionTitle }}</h2>
+  
+  <mat-dialog-content>
+    <div class="contract-info">
+      <h3>{{ data.approval.contractTitle }}</h3>
+      <p><strong>Contract #:</strong> {{ data.approval.contractNumber }}</p>
+      <p><strong>Step:</strong> {{ data.approval.stepName }}</p>
+      <p><strong>Value:</strong> {{ data.approval.contractValue | currency }}</p>
+    </div>
+
+    <form [formGroup]="actionForm">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>{{ isReject ? 'Rejection Reason (Required)' : 'Comments (Optional)' }}</mat-label>
+        <textarea matInput 
+                  formControlName="comments" 
+                  rows="4" 
+                  [placeholder]="isReject ? 'Please provide a reason for rejection...' : 'Add any comments about your decision...'">
+        </textarea>
+        <mat-error *ngIf="actionForm.get('comments')?.hasError('required')">
+          Rejection reason is required
+        </mat-error>
+      </mat-form-field>
+    </form>
+
+    <div class="warning-message" *ngIf="isReject">
+      <mat-icon color="warn">warning</mat-icon>
+      <span>Rejecting this contract will send it back to the requester for revision.</span>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-stroked-button (click)="onCancel()">Cancel</button>
+    <button mat-raised-button 
+            [color]="actionColor" 
+            (click)="onSubmit()" 
+            [disabled]="actionForm.invalid">
+      <mat-icon>{{ isReject ? 'close' : 'check' }}</mat-icon>
+      {{ isReject ? 'Reject' : 'Approve' }}
+    </button>
+  </mat-dialog-actions>
+</div>

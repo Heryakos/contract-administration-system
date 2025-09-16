@@ -1,0 +1,712 @@
+<!-- Enhanced Header with Professional Styling -->
+<div class="contract-generator">
+  <mat-toolbar class="header-toolbar">
+    <div class="toolbar-content">
+      <div class="title-section">
+        <h1 class="main-title">Contract Generator</h1>
+        <p class="subtitle">Advanced contract creation and management</p>
+      </div>
+      <div class="actions-section">
+        <button mat-stroked-button (click)="runComplianceCheck()" class="action-btn">
+          <mat-icon>verified</mat-icon>
+          Check Compliance
+        </button>
+        <button mat-stroked-button (click)="saveDraft()" [disabled]="isSaving" class="action-btn">
+          <mat-icon>save</mat-icon>
+          {{ isSaving ? 'Saving...' : 'Save Draft' }}
+        </button>
+        <button mat-stroked-button [matMenuTriggerFor]="exportMenu" class="action-btn">
+          <mat-icon>download</mat-icon>
+          Export
+        </button>
+        <mat-menu #exportMenu="matMenu">
+          <button mat-menu-item (click)="exportToHTML()">
+            <mat-icon>html</mat-icon>
+            Export HTML
+          </button>
+          <button mat-menu-item (click)="exportToPDF()">
+            <mat-icon>picture_as_pdf</mat-icon>
+            Export PDF
+          </button>
+          <button mat-menu-item (click)="exportToDOCX()">
+            <mat-icon>description</mat-icon>
+            Export DOCX
+          </button>
+          <button mat-menu-item (click)="print()">
+            <mat-icon>print</mat-icon>
+            Print
+          </button>
+        </mat-menu>
+        <button mat-raised-button (click)="submitForApproval()" [disabled]="isSaving" color="accent" class="action-btn">
+          <mat-icon>send</mat-icon>
+          Submit
+        </button>
+        <button mat-stroked-button (click)="togglePreview()" class="action-btn">
+          <mat-icon>{{ showPreview ? 'visibility_off' : 'visibility' }}</mat-icon>
+          {{ showPreview ? 'Hide' : 'Show' }} Preview
+        </button>
+      </div>
+    </div>
+  </mat-toolbar>
+
+  <div class="main-container">
+    <div class="content-grid" [ngClass]="{'with-preview': showPreview, 'full-width': !showPreview}">
+      
+      <!-- Enhanced Sidebar -->
+      <div class="sidebar-panel">
+        <mat-tab-group [(selectedIndex)]="activeTab" class="sidebar-tabs">
+          
+          <!-- Builder Tab -->
+          <mat-tab label="Build">
+            <div class="tab-content">
+              
+              <!-- Contract Metadata Card -->
+              <mat-card class="metadata-card">
+                <mat-card-header>
+                  <mat-card-title class="card-title">
+                    <mat-icon>description</mat-icon>
+                    Contract Details
+                  </mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <form [formGroup]="metadataForm" class="metadata-form">
+                    <mat-form-field appearance="outline" class="form-field">
+                      <mat-label>Template ID</mat-label>
+                      <input matInput formControlName="templateId" placeholder="Enter template ID">
+                      <mat-icon matSuffix>tag</mat-icon>
+                    </mat-form-field>
+                    
+                    <div class="form-row">
+                      <mat-form-field appearance="outline" class="form-field">
+                        <mat-label>Party A</mat-label>
+                        <input matInput formControlName="partyA" placeholder="First party">
+                        <mat-icon matSuffix>person</mat-icon>
+                      </mat-form-field>
+                      
+                      <mat-form-field appearance="outline" class="form-field">
+                        <mat-label>Party B</mat-label>
+                        <input matInput formControlName="partyB" placeholder="Second party">
+                        <mat-icon matSuffix>person</mat-icon>
+                      </mat-form-field>
+                    </div>
+                    
+                    <mat-form-field appearance="outline" class="form-field">
+                      <mat-label>Effective Date</mat-label>
+                      <input matInput [matDatepicker]="datePicker" formControlName="effectiveDate">
+                      <mat-datepicker-toggle matSuffix [for]="datePicker"></mat-datepicker-toggle>
+                      <mat-datepicker #datePicker></mat-datepicker>
+                    </mat-form-field>
+                    
+                    <mat-form-field appearance="outline" class="form-field">
+                      <mat-label>Jurisdiction</mat-label>
+                      <mat-select formControlName="jurisdiction">
+                        <mat-option *ngFor="let jurisdiction of jurisdictions" [value]="jurisdiction.value">
+                          {{ jurisdiction.label }}
+                        </mat-option>
+                      </mat-select>
+                      <mat-icon matSuffix>gavel</mat-icon>
+                    </mat-form-field>
+                    
+                    <div class="value-currency-row">
+                      <mat-form-field appearance="outline" class="value-field">
+                        <mat-label>Contract Value</mat-label>
+                        <input matInput type="number" formControlName="contractValue" placeholder="0">
+                        <mat-icon matSuffix>attach_money</mat-icon>
+                      </mat-form-field>
+                      
+                      <mat-form-field appearance="outline" class="currency-field">
+                        <mat-label>Currency</mat-label>
+                        <mat-select formControlName="currency">
+                          <mat-option *ngFor="let currency of currencies" [value]="currency">
+                            {{ currency }}
+                          </mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+
+                    <button mat-raised-button type="button" (click)="applyMergeFields()" color="primary" class="merge-button">
+                      <mat-icon>auto_fix_high</mat-icon>
+                      Apply Merge Fields
+                    </button>
+                  </form>
+                </mat-card-content>
+              </mat-card>
+
+              <!-- Block Types Card -->
+              <mat-card class="block-types-card">
+                <mat-card-header>
+                  <mat-card-title class="card-title">
+                    <mat-icon>add_box</mat-icon>
+                    Add Elements
+                  </mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <div class="block-buttons-grid">
+                    <button
+                      *ngFor="let blockType of blockTypes"
+                      mat-stroked-button
+                      (click)="onAddElement(blockType.type)"
+                      class="block-button"
+                    >
+                      <mat-icon>{{ blockType.icon }}</mat-icon>
+                      <span>{{ blockType.label }}</span>
+                    </button>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+
+              <!-- Quick Actions -->
+              <div class="quick-actions">
+                <button mat-raised-button (click)="openClauseLibrary()" color="primary" class="action-button">
+                  <mat-icon>library_books</mat-icon>
+                  Clause Library
+                </button>
+                
+                <button mat-raised-button (click)="openTemplateLibrary()" color="primary" class="action-button">
+                  <mat-icon>article</mat-icon>
+                  Templates
+                </button>
+              </div>
+            </div>
+          </mat-tab>
+
+          <!-- Style Tab -->
+          <mat-tab label="Style">
+            <div class="tab-content">
+              <form [formGroup]="customizationForm">
+                
+                <!-- Theme Colors Card -->
+                <mat-card class="style-card">
+                  <mat-card-header>
+                    <mat-card-title class="card-title">
+                      <mat-icon>palette</mat-icon>
+                      Theme Colors
+                    </mat-card-title>
+                  </mat-card-header>
+                  <mat-card-content>
+                    <div class="color-fields">
+                      <div class="color-field">
+                        <label>Primary Color</label>
+                        <input type="color" formControlName="primaryColor" class="color-input">
+                      </div>
+                      
+                      <div class="color-field">
+                        <label>Text Color</label>
+                        <input type="color" formControlName="textColor" class="color-input">
+                      </div>
+                      
+                      <div class="color-field">
+                        <label>Background</label>
+                        <input type="color" formControlName="backgroundColor" class="color-input">
+                      </div>
+                    </div>
+                  </mat-card-content>
+                </mat-card>
+
+                <!-- Typography Card -->
+                <mat-card class="style-card">
+                  <mat-card-header>
+                    <mat-card-title class="card-title">
+                      <mat-icon>text_format</mat-icon>
+                      Typography
+                    </mat-card-title>
+                  </mat-card-header>
+                  <mat-card-content>
+                    <mat-form-field appearance="outline" class="form-field">
+                      <mat-label>Font Family</mat-label>
+                      <mat-select formControlName="fontFamily">
+                        <mat-option *ngFor="let font of fontFamilies" [value]="font">
+                          {{ font }}
+                        </mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                    
+                    <div class="slider-field">
+                      <label>Font Size: {{ customizationForm.value.fontSize }}px</label>
+                      <mat-slider min="10" max="24" step="1" discrete class="slider">
+                        <input matSliderThumb formControlName="fontSize">
+                      </mat-slider>
+                    </div>
+                    
+                    <div class="slider-field">
+                      <label>Line Height: {{ customizationForm.value.lineHeight }}</label>
+                      <mat-slider min="1.2" max="2.0" step="0.1" discrete class="slider">
+                        <input matSliderThumb formControlName="lineHeight">
+                      </mat-slider>
+                    </div>
+                  </mat-card-content>
+                </mat-card>
+
+                <!-- Layout Card -->
+                <mat-card class="style-card">
+                  <mat-card-header>
+                    <mat-card-title class="card-title">
+                      <mat-icon>view_quilt</mat-icon>
+                      Layout Settings
+                    </mat-card-title>
+                  </mat-card-header>
+                  <mat-card-content>
+                    <mat-form-field appearance="outline" class="form-field">
+                      <mat-label>Page Size</mat-label>
+                      <mat-select formControlName="pageSize">
+                        <mat-option *ngFor="let size of pageSizes" [value]="size">
+                          {{ size }}
+                        </mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                    
+                    <div class="slider-field">
+                      <label>Margins: {{ customizationForm.value.margins }}px</label>
+                      <mat-slider min="20" max="80" step="5" discrete class="slider">
+                        <input matSliderThumb formControlName="margins">
+                      </mat-slider>
+                    </div>
+                  </mat-card-content>
+                </mat-card>
+
+                <!-- Features Card -->
+                <mat-card class="style-card">
+                  <mat-card-header>
+                    <mat-card-title class="card-title">
+                      <mat-icon>tune</mat-icon>
+                      Features
+                    </mat-card-title>
+                  </mat-card-header>
+                  <mat-card-content>
+                    <div class="feature-toggles">
+                      <div class="feature-row">
+                        <label>Show Line Numbers</label>
+                        <mat-slide-toggle formControlName="showLineNumbers"></mat-slide-toggle>
+                      </div>
+                      
+                      <div class="feature-row">
+                        <label>Track Changes</label>
+                        <mat-slide-toggle formControlName="trackChanges"></mat-slide-toggle>
+                      </div>
+                      
+                      <div class="feature-row">
+                        <label>Auto Save</label>
+                        <mat-slide-toggle formControlName="autoSave"></mat-slide-toggle>
+                      </div>
+                    </div>
+                  </mat-card-content>
+                </mat-card>
+              </form>
+            </div>
+          </mat-tab>
+
+        </mat-tab-group>
+
+        <!-- Compliance Issues Card -->
+        <mat-card *ngIf="complianceIssues.length > 0" class="compliance-card">
+          <mat-card-header>
+            <mat-card-title class="compliance-title">
+              <mat-icon color="warn">warning</mat-icon>
+              Compliance Issues ({{ complianceIssues.length }})
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="compliance-issues">
+              <div *ngFor="let issue of complianceIssues" class="compliance-issue">
+                <mat-icon [color]="getComplianceIssueColor(issue.type)" class="issue-icon">
+                  {{ getComplianceIssueIcon(issue.type) }}
+                </mat-icon>
+                <span class="issue-message">{{ issue.message }}</span>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Main Content Area -->
+      <div class="main-content">
+        <mat-card class="builder-card">
+          <mat-card-header>
+            <mat-card-title class="card-title">
+              <mat-icon>build</mat-icon>
+              Contract Builder
+            </mat-card-title>
+            <div class="header-actions">
+              <mat-chip-listbox>
+                <mat-chip-option>{{ blocks.length }} blocks</mat-chip-option>
+              </mat-chip-listbox>
+            </div>
+          </mat-card-header>
+          <mat-card-content>
+            <div
+              cdkDropList
+              (cdkDropListDropped)="onDrop($event)"
+              class="block-list"
+            >
+              <div
+                *ngFor="let block of blocks; let i = index"
+                cdkDrag
+                class="block-item"
+                [class.required-block]="block.required"
+              >
+                <div class="block-header">
+                  <mat-icon cdkDragHandle class="drag-handle">drag_indicator</mat-icon>
+                  
+                  <mat-chip class="block-type-chip" [style.background-color]="customization.theme.primaryColor + '20'">
+                    {{ block.type }}
+                  </mat-chip>
+                  
+                  <mat-chip *ngIf="block.required" color="warn" class="required-chip">
+                    Required
+                  </mat-chip>
+                  
+                  <div class="spacer"></div>
+                  
+                  <button mat-icon-button (click)="duplicateBlock(block)" matTooltip="Duplicate Block" class="action-btn">
+                    <mat-icon>content_copy</mat-icon>
+                  </button>
+                  
+                  <button mat-icon-button (click)="removeBlock(block.id)" color="warn" matTooltip="Delete Block" class="action-btn">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+
+                <div class="block-content">
+                  <!-- Enhanced Block Editor -->
+                  <div [ngSwitch]="block.type" class="block-editor">
+                    
+                    <!-- Heading Block -->
+                    <div *ngSwitchCase="'heading'" class="editor-section">
+                      <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Heading Text</mat-label>
+                        <input 
+                          matInput 
+                          [value]="block.label || ''" 
+                          (input)="updateBlock(block.id, { label: $any($event.target).value })"
+                          placeholder="Enter heading text"
+                        >
+                        <mat-icon matSuffix>title</mat-icon>
+                      </mat-form-field>
+                    </div>
+
+                    <!-- Text Block -->
+                    <div *ngSwitchCase="'text'" class="editor-section">
+                      <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Label (optional)</mat-label>
+                        <input 
+                          matInput 
+                          [value]="block.label || ''" 
+                          (input)="updateBlock(block.id, { label: $any($event.target).value })"
+                          placeholder="Enter label"
+                        >
+                      </mat-form-field>
+                      
+                      <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Content</mat-label>
+                        <textarea 
+                          matInput 
+                          [value]="block.value || ''" 
+                          (input)="updateBlock(block.id, { value: $any($event.target).value })"
+                          [attr.placeholder]="'Enter text content (use {{PartyA}}, {{PartyB}} for merge fields)'"
+                          rows="4"
+                        ></textarea>
+                      </mat-form-field>
+                    </div>
+
+                    <!-- Date Block -->
+                    <div *ngSwitchCase="'date'" class="editor-section">
+                      <div class="form-row">
+                        <mat-form-field appearance="outline" class="half-width">
+                          <mat-label>Label</mat-label>
+                          <input 
+                            matInput 
+                            [value]="block.label || ''" 
+                            (input)="updateBlock(block.id, { label: $any($event.target).value })"
+                            placeholder="Date label"
+                          >
+                        </mat-form-field>
+                        
+                        <mat-form-field appearance="outline" class="half-width">
+                          <mat-label>Date</mat-label>
+                          <input 
+                            matInput 
+                            [matDatepicker]="blockDatePicker"
+                            [value]="block.value || ''" 
+                            (dateInput)="updateBlock(block.id, { value: $any($event.target).value })"
+                          >
+                          <mat-datepicker-toggle matSuffix [for]="blockDatePicker"></mat-datepicker-toggle>
+                          <mat-datepicker #blockDatePicker></mat-datepicker>
+                        </mat-form-field>
+                      </div>
+                    </div>
+
+                    <!-- Number Block -->
+                    <div *ngSwitchCase="'number'" class="editor-section">
+                      <div class="form-row">
+                        <mat-form-field appearance="outline" class="half-width">
+                          <mat-label>Label</mat-label>
+                          <input 
+                            matInput 
+                            [value]="block.label || ''" 
+                            (input)="updateBlock(block.id, { label: $any($event.target).value })"
+                            placeholder="Number label"
+                          >
+                        </mat-form-field>
+                        
+                        <mat-form-field appearance="outline" class="half-width">
+                          <mat-label>Value</mat-label>
+                          <input 
+                            matInput 
+                            type="number"
+                            [value]="block.value || ''" 
+                            (input)="updateBlock(block.id, { value: $any($event.target).value })"
+                            placeholder="Enter number"
+                          >
+                        </mat-form-field>
+                      </div>
+                    </div>
+
+                    <!-- List Block -->
+                    <div *ngSwitchCase="'list'" class="editor-section">
+                      <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>List Title</mat-label>
+                        <input 
+                          matInput 
+                          [value]="block.label || ''" 
+                          (input)="updateBlock(block.id, { label: $any($event.target).value })"
+                          placeholder="List title"
+                        >
+                      </mat-form-field>
+                      
+                      <div class="list-items">
+                        <div *ngFor="let item of block.items || []; let j = index" class="list-item">
+                          <mat-form-field appearance="outline" class="item-field">
+                            <mat-label>Item {{ j + 1 }}</mat-label>
+                            <input 
+                              matInput 
+                              [value]="item" 
+                              (input)="onListItemChange(block, j, $any($event.target).value)"
+                              [placeholder]="'Item ' + (j + 1)"
+                            >
+                          </mat-form-field>
+                          
+                          <button mat-icon-button (click)="removeListItem(block, j)" color="warn" class="remove-btn">
+                            <mat-icon>delete</mat-icon>
+                          </button>
+                        </div>
+                        
+                        <button mat-stroked-button (click)="addListItem(block)" class="add-item-button">
+                          <mat-icon>add</mat-icon>
+                          Add Item
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Table Block -->
+                    <div *ngSwitchCase="'table'" class="editor-section">
+                      <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Table Title</mat-label>
+                        <input 
+                          matInput 
+                          [value]="block.label || ''" 
+                          (input)="updateBlock(block.id, { label: $any($event.target).value })"
+                          placeholder="Table title"
+                        >
+                      </mat-form-field>
+                      
+                      <div class="table-controls">
+                        <button mat-stroked-button (click)="addTableColumn(block)" class="table-btn">
+                          <mat-icon>add</mat-icon>
+                          Add Column
+                        </button>
+                        <button mat-stroked-button (click)="addTableRow(block)" class="table-btn">
+                          <mat-icon>add</mat-icon>
+                          Add Row
+                        </button>
+                      </div>
+                      
+                      <div class="table-editor">
+                        <table mat-table [dataSource]="block.rows || []" class="editable-table">
+                          <ng-container *ngFor="let header of (block.headers || []); let k = index" [matColumnDef]="header">
+                            <th mat-header-cell *matHeaderCellDef class="editable-header">
+                              <input 
+                                matInput 
+                                [value]="header" 
+                                (input)="updateTableHeader(block, k, $any($event.target).value)"
+                                placeholder="Header"
+                                class="header-input"
+                              >
+                              <button mat-icon-button (click)="removeTableColumn(block, k)" color="warn" class="delete-column">
+                                <mat-icon>delete</mat-icon>
+                              </button>
+                            </th>
+                            <td mat-cell *matCellDef="let row; let m = index" class="editable-cell">
+                              <input 
+                                matInput 
+                                [value]="row[k] || ''" 
+                                (input)="updateTableCell(block, m, k, $any($event.target).value)"
+                                class="cell-input"
+                              >
+                            </td>
+                          </ng-container>
+                          
+                          <tr mat-header-row *matHeaderRowDef="(block.headers || [])"></tr>
+                          <tr mat-row *matRowDef="let row; columns: (block.headers || []); let m = index" class="table-row">
+                            <button mat-icon-button (click)="removeTableRow(block, m)" color="warn" class="delete-row">
+                              <mat-icon>delete</mat-icon>
+                            </button>
+                          </tr>
+                        </table>
+                      </div>
+                    </div>
+
+                    <!-- Signature Block -->
+                    <div *ngSwitchCase="'signature'" class="editor-section">
+                      <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Signature Label</mat-label>
+                        <input 
+                          matInput 
+                          [value]="block.label || 'Signature'" 
+                          (input)="updateBlock(block.id, { label: $any($event.target).value })"
+                          placeholder="Signature label"
+                        >
+                      </mat-form-field>
+                      
+                      <div class="signature-preview">
+                        <div class="signature-area">
+                          <mat-icon class="signature-icon">draw</mat-icon>
+                          <p>Signature will appear here</p>
+                          <div class="signature-line"></div>
+                          <p class="date-line">Date: _______________</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Conditional Block -->
+                    <div *ngSwitchCase="'conditional'" class="editor-section">
+                      <div class="condition-setup">
+                        <label class="condition-label">Show this content when:</label>
+                        <div class="condition-fields">
+                          <mat-form-field appearance="outline">
+                            <mat-label>Field name</mat-label>
+                            <input 
+                              matInput 
+                              [value]="block.conditional?.field || ''" 
+                              (input)="onConditionalFieldChange(block, $any($event.target).value)"
+                              placeholder="Field name"
+                            >
+                          </mat-form-field>
+                          
+                          <mat-form-field appearance="outline">
+                            <mat-label>Operator</mat-label>
+                            <mat-select 
+                              [value]="block.conditional?.operator || 'equals'"
+                              (selectionChange)="onConditionalOperatorChange(block, $event.value)">
+                              <mat-option value="equals">Equals</mat-option>
+                              <mat-option value="not_equals">Not Equals</mat-option>
+                              <mat-option value="contains">Contains</mat-option>
+                              <mat-option value="greater_than">Greater Than</mat-option>
+                            </mat-select>
+                          </mat-form-field>
+                          
+                          <mat-form-field appearance="outline">
+                            <mat-label>Value</mat-label>
+                            <input 
+                              matInput 
+                              [value]="block.conditional?.value || ''" 
+                              (input)="onConditionalValueChange(block, $any($event.target).value)"
+                              placeholder="Value"
+                            >
+                          </mat-form-field>
+                        </div>
+                      </div>
+                      
+                      <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Conditional Content</mat-label>
+                        <textarea 
+                          matInput 
+                          [value]="block.value || ''" 
+                          (input)="updateBlock(block.id, { value: $any($event.target).value })"
+                          placeholder="Content to show when condition is met"
+                          rows="3"
+                        ></textarea>
+                      </mat-form-field>
+                    </div>
+
+                    <!-- Divider Block -->
+                    <div *ngSwitchCase="'divider'" class="editor-section">
+                      <div class="divider-preview">
+                        <mat-divider></mat-divider>
+                        <p class="divider-label">Divider</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Enhanced Style Controls -->
+                  <mat-expansion-panel class="style-controls">
+                    <mat-expansion-panel-header>
+                      <mat-panel-title>
+                        <mat-icon>tune</mat-icon>
+                        Styling Options
+                      </mat-panel-title>
+                    </mat-expansion-panel-header>
+                    
+                    <div class="style-options">
+                      <div class="style-row">
+                        <mat-form-field appearance="outline">
+                          <mat-label>Alignment</mat-label>
+                          <mat-select 
+                            [value]="block.style?.alignment || 'left'"
+                            (selectionChange)="onAlignmentChange(block, $event.value)">
+                            <mat-option value="left">Left</mat-option>
+                            <mat-option value="center">Center</mat-option>
+                            <mat-option value="right">Right</mat-option>
+                            <mat-option value="justify">Justify</mat-option>
+                          </mat-select>
+                        </mat-form-field>
+                        
+                        <mat-form-field appearance="outline">
+                          <mat-label>Font Weight</mat-label>
+                          <mat-select 
+                            [value]="block.style?.fontWeight || 'normal'"
+                            (selectionChange)="onFontWeightChange(block, $event.value)">
+                            <mat-option value="normal">Normal</mat-option>
+                            <mat-option value="bold">Bold</mat-option>
+                            <mat-option value="lighter">Light</mat-option>
+                          </mat-select>
+                        </mat-form-field>
+                      </div>
+                      
+                      <div class="required-toggle">
+                        <mat-slide-toggle 
+                          [checked]="!!block.required"
+                          (change)="onRequiredToggle(block, $event.checked)">
+                          Required Field
+                        </mat-slide-toggle>
+                      </div>
+                    </div>
+                  </mat-expansion-panel>
+                </div>
+              </div>
+
+              <!-- Enhanced Empty State -->
+              <div *ngIf="blocks.length === 0" class="empty-state">
+                <mat-icon class="empty-icon">article</mat-icon>
+                <h3>Start Building Your Contract</h3>
+                <p>Add elements from the sidebar to begin creating your contract</p>
+                <button mat-raised-button color="primary" (click)="addBlock('heading')">
+                  <mat-icon>add</mat-icon>
+                  Add First Element
+                </button>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Enhanced Preview Panel -->
+      <div *ngIf="showPreview" class="preview-panel">
+        <app-contract-preview
+          [blocks]="blocks"
+          [metadata]="metadata"
+          [customization]="customization"
+        ></app-contract-preview>
+      </div>
+    </div>
+  </div>
+</div>

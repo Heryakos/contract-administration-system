@@ -1,0 +1,91 @@
+<h2 mat-dialog-title>
+    <mat-icon>add_circle</mat-icon>
+    Add New Clause
+</h2>
+
+<div mat-dialog-content class="dialog-content">
+    <form #clauseForm="ngForm" (ngSubmit)="onSubmit(clauseForm)">
+        <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Title</mat-label>
+            <input
+                matInput
+                [(ngModel)]="clause.title"
+                name="title"
+                required
+                placeholder="Enter clause title"
+            >
+            <mat-error *ngIf="clauseForm.controls['title']?.hasError('required')">
+                Title is required
+            </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Category</mat-label>
+            <mat-select
+                [(ngModel)]="clause.category"
+                name="category"
+                required
+            >
+                <mat-option *ngFor="let category of categories" [value]="category">
+                    {{ category }}
+                </mat-option>
+                <mat-option value="new">Add New Category</mat-option>
+            </mat-select>
+            <mat-error *ngIf="clauseForm.controls['category']?.hasError('required')">
+                Category is required
+            </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width" *ngIf="clause.category === 'new'">
+            <mat-label>New Category Name</mat-label>
+            <input
+                matInput
+                [(ngModel)]="newCategory"
+                name="newCategory"
+                required
+                placeholder="Enter new category name"
+            >
+            <mat-error *ngIf="clauseForm.controls['newCategory']?.hasError('required')">
+                New category name is required
+            </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Content</mat-label>
+            <textarea
+                matInput
+                [(ngModel)]="clause.content"
+                name="content"
+                required
+                rows="5"
+                placeholder="Enter clause content"
+            ></textarea>
+            <mat-error *ngIf="clauseForm.controls['content']?.hasError('required')">
+                Content is required
+            </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Tags (comma-separated)</mat-label>
+            <input
+                matInput
+                [(ngModel)]="tagsInput"
+                name="tags"
+                placeholder="e.g., legal, contract, standard"
+            >
+        </mat-form-field>
+    </form>
+</div>
+
+<div mat-dialog-actions class="dialog-actions">
+    <button mat-button (click)="close()">Cancel</button>
+    <button
+        mat-raised-button
+        color="primary"
+        [disabled]="!clauseForm.valid"
+        (click)="onSubmit(clauseForm)"
+    >
+        <mat-icon>save</mat-icon>
+        Save Clause
+    </button>
+</div>

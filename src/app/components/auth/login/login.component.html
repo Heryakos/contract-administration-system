@@ -1,0 +1,57 @@
+<div class="login-container">
+  <div class="login-card">
+    <div class="login-header">
+      <mat-icon class="login-icon">business</mat-icon>
+      <h1>Contract Administration System</h1>
+      <p>Sign in to manage your contracts</p>
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Username</mat-label>
+        <input matInput formControlName="username" autocomplete="username">
+        <mat-icon matSuffix>person</mat-icon>
+        <mat-error *ngIf="username?.hasError('required')">
+          Username is required
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Password</mat-label>
+        <input matInput 
+               [type]="hidePassword ? 'password' : 'text'" 
+               formControlName="password" 
+               autocomplete="current-password">
+        <button mat-icon-button matSuffix 
+                (click)="hidePassword = !hidePassword" 
+                type="button"
+                [attr.aria-label]="'Hide password'" 
+                [attr.aria-pressed]="hidePassword">
+          <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+        </button>
+        <mat-error *ngIf="password?.hasError('required')">
+          Password is required
+        </mat-error>
+        <mat-error *ngIf="password?.hasError('minlength')">
+          Password must be at least 6 characters
+        </mat-error>
+      </mat-form-field>
+
+      <button mat-raised-button 
+              color="primary" 
+              type="submit" 
+              class="login-button w-full"
+              [disabled]="loginForm.invalid || loading">
+        <mat-spinner *ngIf="loading" diameter="20" class="login-spinner"></mat-spinner>
+        <span *ngIf="!loading">Sign In</span>
+        <span *ngIf="loading">Signing In...</span>
+      </button>
+    </form>
+
+    <div class="login-footer">
+      <p class="text-center">
+        Need help? Contact your system administrator
+      </p>
+    </div>
+  </div>
+</div>

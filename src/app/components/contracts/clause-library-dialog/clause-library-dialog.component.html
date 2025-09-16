@@ -1,0 +1,68 @@
+<h2 mat-dialog-title>
+  <mat-icon>library_books</mat-icon>
+  Clause Library
+</h2>
+
+<div mat-dialog-content class="dialog-content">
+  <!-- Search and Filter -->
+  <div class="search-filter-section">
+      <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Search clauses...</mat-label>
+          <input matInput [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()">
+          <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+
+      <div class="category-chips">
+          <mat-chip-listbox>
+              <mat-chip-option
+                  *ngFor="let category of categories"
+                  [selected]="selectedCategory === category"
+                  (click)="onCategoryChange(category)"
+              >
+                  {{ category }}
+              </mat-chip-option>
+          </mat-chip-listbox>
+      </div>
+  </div>
+
+  <!-- Clauses List -->
+  <div class="clauses-container">
+      <div *ngFor="let clause of filteredClauses" class="clause-card">
+          <mat-card class="clause-item">
+              <mat-card-content>
+                  <div class="clause-header">
+                      <h3 class="clause-title">{{ clause.title }}</h3>
+                      <mat-chip class="category-chip" color="primary">{{ clause.category }}</mat-chip>
+                  </div>
+
+                  <p class="clause-content">{{ clause.content }}</p>
+
+                  <div class="clause-footer">
+                      <div class="clause-tags">
+                          <mat-chip *ngFor="let tag of clause.tags" class="tag-chip">{{ tag }}</mat-chip>
+                      </div>
+
+                      <button mat-raised-button color="primary" (click)="insertClause(clause)">
+                          <mat-icon>add</mat-icon>
+                          Insert
+                      </button>
+                  </div>
+              </mat-card-content>
+          </mat-card>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="filteredClauses.length === 0" class="empty-state">
+          <mat-icon class="empty-icon">library_books</mat-icon>
+          <p>No clauses found matching your search</p>
+      </div>
+  </div>
+</div>
+
+<div mat-dialog-actions class="dialog-actions">
+  <button mat-raised-button color="accent" (click)="openAddClauseDialog()">
+      <mat-icon>add</mat-icon>
+      Add New Clause
+  </button>
+  <button mat-button (click)="close()">Close</button>
+</div>

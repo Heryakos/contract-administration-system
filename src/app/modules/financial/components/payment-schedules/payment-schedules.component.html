@@ -1,0 +1,156 @@
+<div class="payment-schedules-container">
+  <div class="page-header">
+    <h1>Payment Schedules</h1>
+    <p class="subtitle">Monitor and manage contract payment schedules</p>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <mat-spinner></mat-spinner>
+    <p>Loading payment schedules...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-container">
+    <mat-icon color="warn">error</mat-icon>
+    <p>{{ error }}</p>
+    <button mat-raised-button color="primary" (click)="loadUpcomingPayments()">
+      Retry
+    </button>
+  </div>
+
+  <!-- Payment Schedules Table -->
+  <mat-card *ngIf="!loading && !error" class="table-card">
+    <mat-card-header>
+      <mat-card-title>Upcoming Payments</mat-card-title>
+      <div class="header-actions">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Search payments</mat-label>
+          <input matInput (keyup)="applyFilter($event)" placeholder="Contract, description...">
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+      </div>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="table-container">
+        <table mat-table [dataSource]="dataSource" matSort class="payments-table">
+          <!-- Contract Number Column -->
+          <ng-container matColumnDef="contractNumber">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Contract #</th>
+            <td mat-cell *matCellDef="let payment">
+              <span class="contract-number">{{ payment.contractNumber }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Contract Title Column -->
+          <ng-container matColumnDef="contractTitle">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Contract</th>
+            <td mat-cell *matCellDef="let payment">
+              <div class="contract-info">
+                <span class="title">{{ payment.contractTitle }}</span>
+                <span class="description">{{ payment.description }}</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Payment Number Column -->
+          <ng-container matColumnDef="paymentNumber">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Payment #</th>
+            <td mat-cell *matCellDef="let payment">
+              <span class="payment-number">{{ payment.paymentNumber }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Scheduled Amount Column -->
+          <ng-container matColumnDef="scheduledAmount">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Amount</th>
+            <td mat-cell *matCellDef="let payment">
+              <span class="amount">{{ formatCurrency(payment.scheduledAmount) }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Scheduled Date Column -->
+          <ng-container matColumnDef="scheduledDate">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Due Date</th>
+            <td mat-cell *matCellDef="let payment">
+              <div class="date-info">
+                <span class="date">{{ payment.scheduledDate | date:'mediumDate' }}</span>
+                <mat-chip [color]="getUrgencyColor(payment.daysUntilDue!)" selected>
+                  {{ payment.daysUntilDue! < 0 ? 'Overdue' : payment.daysUntilDue + ' days' }}
+                </mat-chip>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Status Column -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let payment">
+              <mat-chip [color]="getStatusColor(payment.status)" selected>
+                {{ payment.status }}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <!-- Paid Amount Column -->
+          <ng-container matColumnDef="paidAmount">
+            <th mat-header-cell *matHeaderCellDef>Paid</th>
+            <td mat-cell *matCellDef="let payment">
+              <div class="payment-progress">
+                <span class="paid-amount">{{ formatCurrency(payment.paidAmount) }}</span>
+                <div class="progress-bar">
+                  <div class="progress-fill" 
+                       [style.width.%]="(payment.paidAmount / payment.scheduledAmount) * 100">
+                  </div>
+                </div>
+                <span class="progress-text">
+                  {{ ((payment.paidAmount / payment.scheduledAmount) * 100 | number:'1.0-0') }}%
+                </span>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let payment">
+              <button mat-icon-button [matMenuTriggerFor]="menu">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #menu="matMenu">
+                <button mat-menu-item>
+                  <mat-icon>visibility</mat-icon>
+                  View Details
+                </button>
+                <button mat-menu-item>
+                  <mat-icon>receipt</mat-icon>
+                  View Invoices
+                </button>
+                <button mat-menu-item>
+                  <mat-icon>edit</mat-icon>
+                  Edit Schedule
+                </button>
+              </mat-menu>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+
+        <!-- No Data State -->
+        <div *ngIf="dataSource.data.length === 0" class="no-data">
+          <mat-icon>event_available</mat-icon>
+          <h3>No Payment Schedules</h3>
+          <p>No upcoming payment schedules found.</p>
+        </div>
+      </div>
+
+      <mat-paginator [pageSizeOptions]="[10, 25, 50]" 
+                     showFirstLastButtons
+                     aria-label="Select page of payment schedules">
+      </mat-paginator>
+    </mat-card-content>
+  </mat-card>
+</div>

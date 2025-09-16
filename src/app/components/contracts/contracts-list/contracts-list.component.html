@@ -1,0 +1,209 @@
+<div class="contracts-container">
+  <!-- Header -->
+  <div class="contracts-header">
+    <div class="header-content">
+      <h1>Contracts</h1>
+      <p>Manage and track all your contracts</p>
+    </div>
+    <div class="header-actions">
+      <button mat-raised-button color="primary" (click)="createContract()">
+        <mat-icon>add</mat-icon>
+        New Contract
+      </button>
+      <!-- <button mat-stroked-button (click)="exportContracts()">
+        <mat-icon>download</mat-icon>
+        Export
+      </button> -->
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <mat-card class="filters-card">
+    <mat-card-content>
+      <div class="filters-grid">
+        <mat-form-field appearance="outline">
+          <mat-label>Search contracts</mat-label>
+          <input matInput [formControl]="searchControl" placeholder="Contract number, title...">
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Status</mat-label>
+          <mat-select [formControl]="statusFilter">
+            <mat-option *ngFor="let status of statusOptions" [value]="status.value">
+              {{ status.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Vendor</mat-label>
+          <mat-select [formControl]="vendorFilter">
+            <mat-option value="">All Vendors</mat-option>
+            <mat-option *ngFor="let vendor of vendors" [value]="vendor.vendorID">
+              {{ vendor.vendorName }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Contract Type</mat-label>
+          <mat-select [formControl]="typeFilter">
+            <mat-option value="">All Types</mat-option>
+            <mat-option *ngFor="let type of contractTypes" [value]="type.contractTypeID">
+              {{ type.typeName }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <button mat-stroked-button (click)="clearFilters()" class="clear-filters-btn">
+          <mat-icon>clear</mat-icon>
+          Clear Filters
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Contracts Table -->
+  <mat-card class="table-card">
+    <mat-card-content>
+      <div class="table-container">
+        <table mat-table [dataSource]="dataSource" matSort class="contracts-table">
+          <!-- Contract Number Column -->
+          <ng-container matColumnDef="contractNumber">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Contract #</th>
+            <td mat-cell *matCellDef="let contract">
+              <a [routerLink]="['/contracts', contract.contractID]" class="contract-link">
+                {{ contract.contractNumber }}
+              </a>
+            </td>
+          </ng-container>
+
+          <!-- Title Column -->
+          <ng-container matColumnDef="contractTitle">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Title</th>
+            <td mat-cell *matCellDef="let contract">
+              <div class="contract-title">
+                {{ contract.contractTitle }}
+                <div class="contract-subtitle" *ngIf="contract.description">
+                  {{ contract.description | slice:0:50 }}{{ contract.description.length > 50 ? '...' : '' }}
+                </div>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Vendor Column -->
+          <ng-container matColumnDef="vendorName">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Vendor</th>
+            <td mat-cell *matCellDef="let contract">
+              {{ contract.vendorName || 'N/A' }}
+            </td>
+          </ng-container>
+
+          <!-- Contract Type Column -->
+          <ng-container matColumnDef="contractType">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Type</th>
+            <td mat-cell *matCellDef="let contract">
+              {{ contract.contractType || 'N/A' }}
+            </td>
+          </ng-container>
+
+          <!-- Value Column -->
+          <ng-container matColumnDef="contractValue">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Value</th>
+            <td mat-cell *matCellDef="let contract">
+              <div class="contract-value">
+                {{ contract.contractValue ? formatCurrency(contract.contractValue) : 'N/A' }}
+                <div class="currency" *ngIf="contract.contractValue">{{ contract.currency }}</div>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Status Column -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+            <td mat-cell *matCellDef="let contract">
+              <span [class]="getStatusClass(contract.status)">{{ contract.status }}</span>
+            </td>
+          </ng-container>
+
+          <!-- End Date Column -->
+          <ng-container matColumnDef="endDate">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>End Date</th>
+            <td mat-cell *matCellDef="let contract">
+              {{ contract.endDate | date:'shortDate' }}
+            </td>
+          </ng-container>
+
+          <!-- Days to Expiry Column -->
+          <ng-container matColumnDef="daysToExpiry">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Days Left</th>
+            <td mat-cell *matCellDef="let contract">
+              <span [class]="getExpiryClass(contract.daysToExpiry)">
+                {{ contract.daysToExpiry }} days
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let contract">
+              <button mat-icon-button [matMenuTriggerFor]="actionMenu">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #actionMenu="matMenu">
+                <button mat-menu-item (click)="viewContract(contract)">
+                  <mat-icon>visibility</mat-icon>
+                  <span>View</span>
+                </button>
+                <button mat-menu-item (click)="editContract(contract)">
+                  <mat-icon>edit</mat-icon>
+                  <span>Edit</span>
+                </button>
+                <mat-divider></mat-divider>
+                <button mat-menu-item>
+                  <mat-icon>file_copy</mat-icon>
+                  <span>Duplicate</span>
+                </button>
+                <button mat-menu-item>
+                  <mat-icon>archive</mat-icon>
+                  <span>Archive</span>
+                </button>
+              </mat-menu>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;" 
+              class="contract-row" 
+              (click)="viewContract(row)"></tr>
+        </table>
+
+        <!-- Loading State -->
+        <div class="loading-container" *ngIf="loading">
+          <mat-spinner></mat-spinner>
+          <p>Loading contracts...</p>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" *ngIf="!loading && dataSource.data.length === 0">
+          <mat-icon>description</mat-icon>
+          <h3>No contracts found</h3>
+          <p>Try adjusting your filters or create a new contract</p>
+          <button mat-raised-button color="primary" (click)="createContract()">
+            Create Contract
+          </button>
+        </div>
+      </div>
+
+      <!-- Paginator -->
+      <mat-paginator 
+        [pageSizeOptions]="[10, 25, 50, 100]"
+        [pageSize]="10"
+        [showFirstLastButtons]="true"
+        (page)="onPageChange()">
+      </mat-paginator>
+    </mat-card-content>
+  </mat-card>
+</div>

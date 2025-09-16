@@ -1,0 +1,24 @@
+<mat-toolbar color="primary">
+  <button mat-icon-button (click)="drawer.toggle()" aria-label="Toggle sidenav">
+    <mat-icon>menu</mat-icon>
+  </button>
+
+  <span class="app-title">Contract Administration System</span>
+
+  <span class="spacer"></span>
+
+  <ng-container *ngIf="currentUser$ | async as user; else loggedOut">
+    <div class="user-info">
+      <mat-icon>account_circle</mat-icon>
+      <div class="user-details">
+        <div class="user-name">{{ user.fullName || user.username }}</div>
+        <div class="user-role">{{ user.roles && user.roles.length ? user.roles[0].roleName : '' }}</div>
+      </div>
+      <button mat-button (click)="logout()">Logout</button>
+    </div>
+  </ng-container>
+
+  <ng-template #loggedOut>
+    <button mat-button routerLink="/login">Login</button>
+  </ng-template>
+</mat-toolbar>

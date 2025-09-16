@@ -1,0 +1,169 @@
+<div class="contract-form-container">
+  <div class="form-header">
+    <h1>{{ isEditMode ? 'Edit Contract' : 'Create New Contract' }}</h1>
+    <p class="subtitle">{{ isEditMode ? 'Update contract information' : 'Fill in the details to create a new contract' }}</p>
+  </div>
+
+  <form [formGroup]="contractForm" (ngSubmit)="onSubmit()" class="contract-form">
+    <!-- Basic Information Section -->
+    <mat-card class="form-section">
+      <mat-card-header>
+        <mat-card-title>Basic Information</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Contract Title</mat-label>
+            <input matInput formControlName="contractTitle" placeholder="Enter contract title">
+            <mat-error>{{ getFieldError('contractTitle') }}</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Contract Number</mat-label>
+            <input matInput formControlName="contractNumber" placeholder="e.g., CNT-2024-001">
+            <mat-error>{{ getFieldError('contractNumber') }}</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Status</mat-label>
+            <mat-select formControlName="status">
+              <mat-option value="Draft">Draft</mat-option>
+              <mat-option value="Active">Active</mat-option>
+              <mat-option value="Expired">Expired</mat-option>
+              <mat-option value="Terminated">Terminated</mat-option>
+            </mat-select>
+            <mat-error>{{ getFieldError('status') }}</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Description</mat-label>
+            <textarea matInput formControlName="description" rows="3" placeholder="Enter contract description"></textarea>
+            <mat-error>{{ getFieldError('description') }}</mat-error>
+          </mat-form-field>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Classification Section -->
+    <mat-card class="form-section">
+      <mat-card-header>
+        <mat-card-title>Classification</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="third-width">
+            <mat-label>Vendor</mat-label>
+            <mat-select formControlName="vendorID">
+              <mat-option *ngFor="let vendor of vendors" [value]="vendor.vendorID">
+                {{ vendor.vendorName }}
+              </mat-option>
+            </mat-select>
+            <mat-error>{{ getFieldError('vendorID') }}</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="third-width">
+            <mat-label>Contract Type</mat-label>
+            <mat-select formControlName="contractTypeID">
+              <mat-option *ngFor="let type of contractTypes" [value]="type.contractTypeID">
+                {{ type.typeName }}
+              </mat-option>
+            </mat-select>
+            <mat-error>{{ getFieldError('contractTypeID') }}</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="third-width">
+            <mat-label>Category</mat-label>
+            <mat-select formControlName="categoryID">
+              <mat-option *ngFor="let category of categories" [value]="category.categoryID">
+                {{ category.categoryName }}
+              </mat-option>
+            </mat-select>
+            <mat-error>{{ getFieldError('categoryID') }}</mat-error>
+          </mat-form-field>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Financial Information Section -->
+    <mat-card class="form-section">
+      <mat-card-header>
+        <mat-card-title>Financial Information</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Contract Value</mat-label>
+            <input matInput type="number" formControlName="contractValue" placeholder="0.00">
+            <span matPrefix>$&nbsp;</span>
+            <mat-error>{{ getFieldError('contractValue') }}</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Currency</mat-label>
+            <mat-select formControlName="currency">
+              <mat-option value="USD">USD - US Dollar</mat-option>
+              <mat-option value="EUR">EUR - Euro</mat-option>
+              <mat-option value="GBP">GBP - British Pound</mat-option>
+              <mat-option value="CAD">CAD - Canadian Dollar</mat-option>
+            </mat-select>
+            <mat-error>{{ getFieldError('currency') }}</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Payment Terms</mat-label>
+            <textarea matInput formControlName="paymentTerms" rows="2" placeholder="e.g., Net 30 days, 50% advance payment"></textarea>
+          </mat-form-field>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Timeline Section -->
+    <mat-card class="form-section">
+      <mat-card-header>
+        <mat-card-title>Timeline</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Start Date</mat-label>
+            <input matInput [matDatepicker]="startPicker" formControlName="startDate">
+            <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+            <mat-datepicker #startPicker></mat-datepicker>
+            <mat-error>{{ getFieldError('startDate') }}</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>End Date</mat-label>
+            <input matInput [matDatepicker]="endPicker" formControlName="endDate">
+            <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+            <mat-datepicker #endPicker></mat-datepicker>
+            <mat-error>{{ getFieldError('endDate') }}</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-checkbox formControlName="autoRenewal">
+            Enable automatic renewal
+          </mat-checkbox>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <button mat-stroked-button type="button" (click)="onCancel()" [disabled]="loading">
+        Cancel
+      </button>
+      <button mat-raised-button color="primary" type="submit" [disabled]="loading || contractForm.invalid">
+        <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
+        {{ isEditMode ? 'Update Contract' : 'Create Contract' }}
+      </button>
+    </div>
+  </form>
+</div>
