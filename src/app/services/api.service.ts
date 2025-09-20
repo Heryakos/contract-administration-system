@@ -12,11 +12,11 @@ import { type ContractBlock } from "../interfaces/contract.interface"
 
 @Injectable({ providedIn: "root" })
 export class ApiService {
-  public readonly api = environment.apiUrl
+  public readonly api = environment.rootPath2
   constructor(public readonly http: HttpClient) {}
 
   // Toggle mocks here (or wire to environment flag)
-  private readonly useMocks = true
+  private readonly useMocks = false
   private mock<T>(data: T, ms = 200): Observable<T> {
     return of(data).pipe(delay(ms))
   }

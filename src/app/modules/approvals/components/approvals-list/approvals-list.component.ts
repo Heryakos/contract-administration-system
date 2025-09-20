@@ -1,11 +1,12 @@
-import { Component, type OnInit, ViewChild } from "@angular/core"
+import { Component, type OnInit, ViewChild, OnDestroy } from "@angular/core"
 import { MatTableDataSource } from "@angular/material/table"
 import { MatPaginator } from "@angular/material/paginator"
 import { MatSort } from "@angular/material/sort"
 import { MatDialog } from "@angular/material/dialog"
 import { Router } from "@angular/router"
+import { Subscription } from "rxjs"
 import { ApprovalService } from "../../services/approval.service"
-import { AuthService } from "../../../../services/auth.service"
+import { ConService } from "../../../../services/con.service"
 import { ApprovalActionDialogComponent } from "../approval-action-dialog/approval-action-dialog.component"
 
 export interface PendingApproval {
@@ -25,7 +26,7 @@ export interface PendingApproval {
   templateUrl: "./approvals-list.component.html",
   styleUrls: ["./approvals-list.component.scss"],
 })
-export class ApprovalsListComponent implements OnInit {
+export class ApprovalsListComponent implements OnInit, OnDestroy {
   @ViewChild(MatPaginator) paginator!: MatPaginator
   @ViewChild(MatSort) sort!: MatSort
 
@@ -40,16 +41,82 @@ export class ApprovalsListComponent implements OnInit {
   dataSource = new MatTableDataSource<PendingApproval>()
   loading = true
   error: string | null = null
+  private employeeSubscription!: Subscription
+  private currentUserGuid: string | null = null
 
   constructor(
     private approvalService: ApprovalService,
-    private authService: AuthService,
+    private con: ConService,
     private dialog: MatDialog,
     private router: Router,
   ) {}
 
   ngOnInit(): void {
-    this.loadPendingApprovals()
+    console.log('ApprovalsListComponent ngOnInit called');
+    
+    // Check if we already have employee data
+    const currentEmployee = this.con.getCurrentEmployeeSnapshot();
+    
+    console.log('Current employee snapshot:', currentEmployee); // Debug log
+    
+    if (currentEmployee && this.getUserIdFromEmployee(currentEmployee)) {
+      this.currentUserGuid = this.getUserIdFromEmployee(currentEmployee);
+      console.log('Using snapshot user_ID:', this.currentUserGuid); // Debug log
+      this.loadPendingApprovals();
+    } else {
+      // Wait for employee to load before fetching approvals
+      this.employeeSubscription = this.con.currentEmployee$.subscribe((employeeData) => {
+        console.log('Employee data received:', employeeData); // Debug log
+        
+        // Handle different possible response formats
+        const userId = this.getUserIdFromEmployee(employeeData);
+        
+        if (userId) {
+          this.currentUserGuid = userId;
+          console.log('Using subscription user_ID:', this.currentUserGuid); // Debug log
+          this.loadPendingApprovals();
+        } else if (employeeData === null) {
+          // Do nothing, wait for the next emission
+          console.log('Employee data is null, waiting for next emission'); // Debug log
+        } else {
+          console.log('No user_ID found in employee data'); // Debug log
+          this.handleEmployeeError();
+        }
+      }, (error) => {
+        console.error('Error in employee subscription:', error);
+        this.handleEmployeeError();
+      });
+    }
+  }
+  
+  // Helper method to extract user_ID from different possible formats
+  private getUserIdFromEmployee(employeeData: any): string | null {
+    if (!employeeData) return null;
+    
+    // If it's a direct object, try to get user_ID
+    if (typeof employeeData === 'object' && !Array.isArray(employeeData)) {
+      return employeeData.user_ID ?? employeeData.employee_Id ?? null;
+    }
+    
+    // If it's an array, try [0].user_ID
+    if (Array.isArray(employeeData) && employeeData.length > 0) {
+      const firstItem = employeeData[0];
+      return firstItem.user_ID ?? firstItem.employee_Id ?? null;
+    }
+    
+    // If it's wrapped in c_Employees array (old format)
+    if (employeeData.c_Employees && Array.isArray(employeeData.c_Employees) && employeeData.c_Employees.length > 0) {
+      const firstEmployee = employeeData.c_Employees[0];
+      return firstEmployee.user_ID ?? firstEmployee.employee_Id ?? null;
+    }
+    
+    return null;
+  }
+
+  ngOnDestroy(): void {
+    if (this.employeeSubscription) {
+      this.employeeSubscription.unsubscribe();
+    }
   }
 
   ngAfterViewInit(): void {
@@ -58,50 +125,31 @@ export class ApprovalsListComponent implements OnInit {
   }
 
   loadPendingApprovals(): void {
-    this.loading = true
-    const currentUser = this.authService.getCurrentUserSnapshot()
-
-    if (!currentUser) {
-      if (this.authService.isAuthenticated()) {
-        // Try to fetch the current user when token exists but snapshot is empty
-        this.authService.getCurrentUser().subscribe({
-          next: (user) => {
-            const userId = user.userID
-            this.approvalService.getPendingApprovals(userId).subscribe({
-              next: (approvals) => {
-                this.dataSource.data = approvals
-                this.loading = false
-              },
-              error: (error) => {
-                this.error = "Failed to load pending approvals"
-                this.loading = false
-                console.error("Error loading approvals:", error)
-              },
-            })
-          },
-          error: () => {
-            this.error = "User not authenticated"
-            this.loading = false
-          },
-        })
-        return
-      }
-      this.error = "User not authenticated"
-      this.loading = false
-      return
+    if (!this.currentUserGuid) {
+      this.error = "User not identified. Please try refreshing the page.";
+      this.loading = false;
+      return;
     }
 
-    this.approvalService.getPendingApprovals(currentUser.userID).subscribe({
-      next: (approvals) => {
-        this.dataSource.data = approvals
-        this.loading = false
+    this.loading = true;
+    this.error = null;
+
+    this.approvalService.getPendingApprovals(this.currentUserGuid).subscribe({
+      next: (approvals: PendingApproval[]) => {
+        this.dataSource.data = approvals;
+        this.loading = false;
       },
-      error: (error) => {
-        this.error = "Failed to load pending approvals"
-        this.loading = false
-        console.error("Error loading approvals:", error)
+      error: (error: any) => {
+        this.error = "Failed to load pending approvals";
+        this.loading = false;
+        console.error("Error loading approvals:", error);
       },
-    })
+    });
+  }
+
+  private handleEmployeeError(): void {
+    this.error = "Unable to retrieve employee information. Please try refreshing the page.";
+    this.loading = false;
   }
 
   applyFilter(event: Event): void {
@@ -130,7 +178,7 @@ export class ApprovalsListComponent implements OnInit {
       },
     })
 
-    dialogRef.afterClosed().subscribe((result) => {
+    dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
         this.processApproval(approval.approvalID, "approve", result.comments)
       }
@@ -146,7 +194,7 @@ export class ApprovalsListComponent implements OnInit {
       },
     })
 
-    dialogRef.afterClosed().subscribe((result) => {
+    dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
         this.processApproval(approval.approvalID, "reject", result.comments)
       }
@@ -154,13 +202,22 @@ export class ApprovalsListComponent implements OnInit {
   }
 
   private processApproval(approvalId: string, action: "approve" | "reject", comments?: string): void {
-    const currentUser = this.authService.getCurrentUserSnapshot()
-    if (!currentUser) return
-
-    const request = {
-      approverId: currentUser.userID,
-      comments: comments,
+    if (!this.currentUserGuid) {
+      this.error = "User not identified. Please try refreshing the page."
+      return
     }
+
+    // Create the request in the exact format the API expects
+    const request = {
+      approverId: this.currentUserGuid,
+      comments: comments
+    }
+
+    console.log('Processing approval:', {
+      approvalId,
+      action,
+      request
+    });
 
     const serviceCall =
       action === "approve"
@@ -169,10 +226,12 @@ export class ApprovalsListComponent implements OnInit {
 
     serviceCall.subscribe({
       next: () => {
-        this.loadPendingApprovals() // Refresh the list
+        // Reload approvals using the stored user GUID
+        this.loadPendingApprovals()
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error(`Error ${action}ing approval:`, error)
+        this.error = `Failed to ${action} contract. Please try again.`
       },
     })
   }
@@ -180,7 +239,7 @@ export class ApprovalsListComponent implements OnInit {
   formatCurrency(amount: number): string {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: "USD",
+      currency: "Birr",
     }).format(amount)
   }
 

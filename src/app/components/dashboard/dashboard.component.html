@@ -5,7 +5,6 @@
   </div>
 
   <div class="dashboard-content" *ngIf="!loading">
-    <!-- Summary Cards -->
     <div class="summary-grid" *ngIf="summary$ | async as summary">
       <mat-card class="summary-card">
         <mat-card-content>
@@ -91,6 +90,39 @@
         </mat-card-content>
       </mat-card>
     </div>
+
+    <mat-card *ngIf="summary$ | async as summary" style="margin-bottom: 16px;">
+      <div class="header-row" style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+        <div style="font-weight:600;">Portfolio Overview</div>
+        <div style="display:flex;gap:8px;">
+          <button mat-stroked-button color="primary" (click)="exportPortfolioPNG()">
+            <mat-icon>image</mat-icon>
+            PNG
+          </button>
+          <button mat-stroked-button color="primary" (click)="exportPortfolioPDF()">
+            <mat-icon>picture_as_pdf</mat-icon>
+            PDF
+          </button>
+          <button mat-stroked-button color="primary" (click)="exportPortfolioCSV(summary)">
+            <mat-icon>table_view</mat-icon>
+            CSV
+          </button>
+        </div>
+      </div>
+      <div #portfolioExport>
+        <apx-chart
+          #portfolioChart
+          [series]="donutOptions.series"
+          [chart]="donutOptions.chart"
+          [labels]="donutOptions.labels"
+          [dataLabels]="donutOptions.dataLabels"
+          [fill]="donutOptions.fill"
+          [legend]="donutOptions.legend"
+          [plotOptions]="donutOptions.plotOptions"
+          [responsive]="donutOptions.responsive"
+        ></apx-chart>
+      </div>
+    </mat-card>
 
     <!-- Recent Contracts and Expiring Contracts -->
     <div class="dashboard-tables">
@@ -201,7 +233,6 @@
     </div>
   </div>
 
-  <!-- Loading State -->
   <div class="loading-container" *ngIf="loading">
     <mat-spinner></mat-spinner>
     <p>Loading dashboard data...</p>

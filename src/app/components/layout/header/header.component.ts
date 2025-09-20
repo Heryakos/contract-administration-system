@@ -1,8 +1,8 @@
 import { Component, Input, type OnInit } from "@angular/core"
 import { MatSidenav } from "@angular/material/sidenav"
 import { Observable } from "rxjs"
-import { AuthService } from "../../../services/auth.service"
-import { type User } from "../../../models/user.model"
+import { map } from "rxjs/operators"
+import { ConService } from "../../../services/con.service"
 
 @Component({
   selector: "app-header",
@@ -12,15 +12,22 @@ import { type User } from "../../../models/user.model"
 export class HeaderComponent implements OnInit {
   @Input() drawer!: MatSidenav
 
-  currentUser$: Observable<User | null>
+  currentEmployee$: Observable<any | null>
 
-  constructor(private authService: AuthService) {
-    this.currentUser$ = this.authService.currentUser$
+  constructor(private con: ConService) {
+    this.currentEmployee$ = this.con.currentEmployee$.pipe(
+      map(employeeData => {
+        if (employeeData && employeeData.c_Employees && employeeData.c_Employees.length > 0) {
+          return employeeData.c_Employees[0];
+        }
+        return null;
+      })
+    );
   }
 
   ngOnInit(): void {}
 
   logout(): void {
-    this.authService.logout()
+    // No-op; identity comes from environment. Could navigate to login if needed.
   }
 }

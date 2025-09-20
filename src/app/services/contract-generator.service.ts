@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { ContractService } from './contract.service';
+import { ConService } from './con.service';
 import { ContractBlock, ContractMetadata, ContractCustomization, Template, Clause, ComplianceIssue } from '../interfaces/contract-generator.interface';
 
 @Injectable({
@@ -35,15 +36,6 @@ export class ContractGeneratorService {
     }
   ];
 
-  addClause(clause: Clause): void {
-    const withId: Clause = {
-      ...clause,
-      id: clause.id && clause.id.trim() ? clause.id : `clause-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
-    };
-    this.mockClauses.push(withId);
-  }
-
-
   private metadataSubject = new BehaviorSubject<ContractMetadata>({
     templateId: '',
     partyA: '',
@@ -53,7 +45,12 @@ export class ContractGeneratorService {
     currency: 'USD',
     jurisdiction: '',
     language: 'en',
-    version: '1.0'
+    version: '1',
+    contractTypeID: undefined,
+    categoryID: undefined,
+    vendorID: undefined,
+    riskLevel: 'Low',
+    duration: 12
   });
 
   private customizationSubject = new BehaviorSubject<ContractCustomization>({
@@ -99,7 +96,10 @@ export class ContractGeneratorService {
   metadata$ = this.metadataSubject.asObservable();
   customization$ = this.customizationSubject.asObservable();
 
-  constructor(private contractService: ContractService) {}
+  constructor(
+    private contractService: ContractService,
+    private conService: ConService
+  ) {}
 
   getBlocks(): ContractBlock[] {
     return this.blocksSubject.value;
@@ -249,19 +249,37 @@ export class ContractGeneratorService {
     this.updateBlocks([...blocks, ...newBlocks]);
   }
 
-  saveContract(): Observable<any> {
+  saveContract(status: string = 'Draft'): Observable<any> {
     const meta = this.metadataSubject.value;
+    const employee = this.conService.getCurrentEmployeeSnapshot();
+    
     const payload = {
       contractNumber: meta.templateId || `CNT-${Date.now()}`,
       contractTitle: `${meta.partyA || 'Party A'} - ${meta.partyB || 'Party B'} Contract`,
       contractValue: meta.contractValue,
       currency: meta.currency,
       startDate: meta.effectiveDate ? new Date(meta.effectiveDate) : undefined,
+      endDate: this.calculateEndDate(meta),
       description: 'Generated via Contract Generator',
-      riskLevel: 'Low'
+      riskLevel: meta.riskLevel || 'Low',
+      status: status,
+      version: meta.version || '1',
+      createdByUserID: employee?.user_ID || employee?.employee_Id, // Add this line
+      contractTypeID: meta.contractTypeID,
+      categoryID: meta.categoryID,
+      vendorID: meta.vendorID
     };
-
+  
     return this.contractService.createContract(payload as any);
+  }
+
+  private calculateEndDate(meta: ContractMetadata): Date | undefined {
+    if (meta.effectiveDate && meta.duration) {
+      const startDate = new Date(meta.effectiveDate);
+      startDate.setMonth(startDate.getMonth() + meta.duration);
+      return startDate;
+    }
+    return undefined;
   }
 
   private getDefaultLabel(type: ContractBlock['type']): string {
@@ -277,5 +295,13 @@ export class ContractGeneratorService {
       case 'divider': return 'Divider';
       default: return 'Block';
     }
+  }
+
+  addClause(clause: Clause): void {
+    const withId: Clause = {
+      ...clause,
+      id: clause.id && clause.id.trim() ? clause.id : `clause-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+    };
+    this.mockClauses.push(withId);
   }
 }

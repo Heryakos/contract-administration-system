@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ApiService } from './api.service';
+import { ConService } from './con.service';
 import type {
   Contract,
   CreateContract,
@@ -9,48 +9,61 @@ import type {
   Vendor,
   ContractType,
   ContractCategory,
+  ContractDocument,
 } from '../models/contract.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ContractService {
-  constructor(private api: ApiService) {}
+  constructor(private con: ConService) {}
 
-  // API service methods
   getContracts(params?: { page?: number; pageSize?: number; search?: string; status?: string; vendorId?: string }): Observable<Contract[]> {
-    return this.api.getContracts(params);
+    return this.con.getContracts({ search: params?.search, status: params?.status });
   }
 
   getContract(id: string): Observable<Contract> {
-    return this.api.getContract(id);
+    return this.con.getContract(id);
   }
 
   createContract(contract: CreateContract): Observable<Contract> {
-    return this.api.createContract(contract);
+    return this.con.createContract(contract);
   }
 
   updateContract(id: string, contract: UpdateContract): Observable<void> {
-    return this.api.updateContract(id, contract);
+    return this.con.updateContract(id, contract);
   }
 
   deleteContract(id: string): Observable<void> {
-    return this.api.deleteContract(id);
+    return this.con.deleteContract(id);
   }
 
   getContractSummary(): Observable<ContractSummary> {
-    return this.api.getContractSummary();
+    return this.con.getContractSummary();
   }
 
   getVendors(): Observable<Vendor[]> {
-    return this.api.getVendors();
+    return this.con.getVendors();
   }
 
   getContractTypes(): Observable<ContractType[]> {
-    return this.api.getContractTypes();
+    return this.con.getContractTypes();
   }
 
   getContractCategories(): Observable<ContractCategory[]> {
-    return this.api.getContractCategories();
+    return this.con.getContractCategories();
+  }
+
+  // Documents
+  getContractDocuments(contractId: number): Observable<ContractDocument[]> {
+    return this.con.getContractDocuments(contractId);
+  }
+
+  uploadContractDocument(contractId: number, file: File, uploadedByUserId?: string): Observable<ContractDocument> {
+    return this.con.uploadContractDocument(contractId, file, uploadedByUserId);
+  }
+
+  deleteContractDocument(contractId: number, documentId: number): Observable<void> {
+    return this.con.deleteContractDocument(contractId, documentId);
   }
 }

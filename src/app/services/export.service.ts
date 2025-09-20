@@ -480,6 +480,73 @@ export class ExportService {
     URL.revokeObjectURL(url);
   }
 
+  // Generic helpers for dashboard/reports exports
+  async exportElementAsPNG(element: HTMLElement, filename = 'export.png'): Promise<void> {
+    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+    const dataUrl = canvas.toDataURL('image/png');
+    const res = await fetch(dataUrl);
+    const blob = await res.blob();
+    this.downloadBlob(blob, filename);
+  }
+
+  async exportElementAsPDF(element: HTMLElement, filename = 'export.pdf', orientation: 'p'|'l' = 'p'): Promise<void> {
+    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF(orientation, 'mm', 'a4');
+    const imgProps = pdf.getImageProperties(imgData);
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const ratio = Math.min(pageWidth / imgProps.width, pageHeight / imgProps.height);
+    const imgWidth = imgProps.width * ratio;
+    const imgHeight = imgProps.height * ratio;
+    const x = (pageWidth - imgWidth) / 2;
+    const y = 10; // small top margin
+    pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
+    pdf.save(filename);
+  }
+
+  exportToCSV(rows: Array<Record<string, any>>, filename = 'export.csv'): void {
+    if (!rows || rows.length === 0) {
+      const blob = new Blob([''], { type: 'text/csv;charset=utf-8;' });
+      this.downloadBlob(blob, filename);
+      return;
+    }
+    const headersSet = rows.reduce<Set<string>>((set, row) => {
+      Object.keys(row).forEach((k) => set.add(k))
+      return set
+    }, new Set<string>())
+    const headers = Array.from(headersSet);
+
+    const escapeCell = (val: any): string => {
+      if (val === null || val === undefined) return '';
+      const s = String(val).replace(/"/g, '""');
+      if (/[",\n]/.test(s)) return `"${s}` + '"';
+      return s;
+    };
+
+    const headerLine = headers.map(escapeCell).join(',');
+    const lines = rows.map((row) => headers.map((h) => escapeCell(row[h])).join(','));
+    const csv = [headerLine, ...lines].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    this.downloadBlob(blob, filename);
+  }
+
+  // Convenience: export a table (array of arrays) to CSV with optional headers
+  exportTableToCSV(headers: string[], rows: any[][], filename = 'export.csv'): void {
+    const escapeCell = (val: any): string => {
+      if (val === null || val === undefined) return '';
+      const s = String(val).replace(/"/g, '""');
+      if (/[",\n]/.test(s)) return `"${s}` + '"';
+      return s;
+    };
+    const lines: string[] = [];
+    if (headers && headers.length) lines.push(headers.map(escapeCell).join(','));
+    for (const row of rows) lines.push(row.map(escapeCell).join(','));
+    const csv = lines.join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    this.downloadBlob(blob, filename);
+  }
+
   private hasMetadataContent(metadata: ContractMetadata): boolean {
     return !!(
       metadata.templateId ||

@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core"
 import { type Observable } from "rxjs"
-import { ApiService } from "../../../services/api.service"
+import { ConService } from "../../../services/con.service"
 
 export interface PendingApproval {
   approvalID: string
@@ -43,25 +43,37 @@ export interface ContractApproval {
   providedIn: "root",
 })
 export class ApprovalService {
-  constructor(private api: ApiService) {}
+  constructor(private con: ConService) {}
 
   getPendingApprovals(userId: string): Observable<PendingApproval[]> {
-    return this.api.getPendingApprovals(userId)
+    return this.con.getPendingApprovals(userId)
   }
 
   getContractApprovalStatus(contractId: string): Observable<ContractApprovalStatus> {
-    return this.api.getContractApprovalStatus(contractId)
+    return this.con.getContractApprovalStatus(Number(contractId))
   }
 
   submitContractForApproval(contractId: string, comments?: string): Observable<any> {
-    return this.api.submitContractForApproval(contractId, comments)
+    return this.con.submitContractForApproval(Number(contractId), comments)
   }
 
   approveStep(approvalId: string, request: ApprovalActionRequest): Observable<any> {
-    return this.api.approveStep(approvalId, request)
+    // Create the exact structure the API expects
+    const apiRequest = {
+      ApproverUserID: request.approverId,
+      Comments: request.comments
+    };
+    
+    return this.con.approveStep(Number(approvalId), apiRequest)
   }
 
   rejectStep(approvalId: string, request: ApprovalActionRequest): Observable<any> {
-    return this.api.rejectStep(approvalId, request)
+    // Create the exact structure the API expects
+    const apiRequest = {
+      ApproverUserID: request.approverId,
+      Comments: request.comments
+    };
+    
+    return this.con.rejectStep(Number(approvalId), apiRequest)
   }
 }

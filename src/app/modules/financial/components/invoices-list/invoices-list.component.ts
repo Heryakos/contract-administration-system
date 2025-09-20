@@ -4,7 +4,7 @@ import { MatPaginator } from "@angular/material/paginator"
 import { MatSort } from "@angular/material/sort"
 import { Router } from "@angular/router"
 import { FinancialService, type Invoice } from "../../services/financial.service"
-import { AuthService } from "../../../../services/auth.service"
+import { ConService } from "../../../../services/con.service"
 
 @Component({
   selector: "app-invoices-list",
@@ -39,7 +39,7 @@ export class InvoicesListComponent implements OnInit {
 
   constructor(
     private financialService: FinancialService,
-    private authService: AuthService,
+    private con: ConService,
     private router: Router,
   ) {}
 
@@ -87,10 +87,10 @@ export class InvoicesListComponent implements OnInit {
   }
 
   approveInvoice(invoice: Invoice): void {
-    const currentUser = this.authService.getCurrentUserSnapshot()
-    if (!currentUser) return
+    const approverGuid: string | null = this.con.getCurrentUserGuid()
+    if (!approverGuid) return
 
-    this.financialService.approveInvoice(invoice.invoiceID, currentUser.userID).subscribe({
+    this.financialService.approveInvoice(invoice.invoiceID, approverGuid).subscribe({
       next: () => {
         this.loadInvoices()
       },
@@ -101,10 +101,10 @@ export class InvoicesListComponent implements OnInit {
   }
 
   rejectInvoice(invoice: Invoice): void {
-    const currentUser = this.authService.getCurrentUserSnapshot()
-    if (!currentUser) return
+    const approverGuid: string | null = this.con.getCurrentUserGuid()
+    if (!approverGuid) return
 
-    this.financialService.rejectInvoice(invoice.invoiceID, currentUser.userID).subscribe({
+    this.financialService.rejectInvoice(invoice.invoiceID, approverGuid).subscribe({
       next: () => {
         this.loadInvoices()
       },

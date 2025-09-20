@@ -1,6 +1,7 @@
 import { Injectable } from "@angular/core"
-import { type Observable } from "rxjs"
-import { ApiService } from "../../../services/api.service"
+import { Observable, forkJoin } from "rxjs"
+import { map } from "rxjs/operators"
+import { ConService } from "../../../services/con.service"
 
 export interface Risk {
   id: number
@@ -54,26 +55,100 @@ export interface RiskDashboard {
   providedIn: "root",
 })
 export class RiskService {
-  constructor(private api: ApiService) {}
+  constructor(private con: ConService) {}
 
   getRisks(contractId?: number, category?: string, status?: string): Observable<Risk[]> {
-    return this.api.getRisks({ contractId, category, status })
+    return this.con.getRisks({ contractId, category, status }).pipe(
+      map((apiRisks: any[]) => {
+        console.log('API Risks response:', apiRisks);
+        return apiRisks.map(risk => this.mapApiRiskToRisk(risk));
+      })
+    );
   }
 
   getRisk(id: number): Observable<Risk> {
-    return this.api.getRisk(id)
+    return this.con.getRisk(id).pipe(
+      map(apiRisk => this.mapApiRiskToRisk(apiRisk))
+    );
   }
 
   createRisk(risk: CreateRisk): Observable<Risk> {
-    return this.api.createRisk(risk)
+    const payload = {
+      ContractID: risk.contractId,
+      RiskTitle: risk.riskTitle,
+      RiskDescription: risk.riskDescription,
+      RiskCategory: risk.riskCategory,
+      Likelihood: risk.likelihood,
+      Impact: risk.impact,
+      MitigationPlan: risk.mitigationPlan,
+      AssignedToUserID: risk.assignedToId
+    };
+    
+    return this.con.createRisk(payload).pipe(
+      map(apiRisk => this.mapApiRiskToRisk(apiRisk))
+    );
   }
 
   updateRisk(id: number, risk: UpdateRisk): Observable<void> {
-    return this.api.updateRisk(id, risk)
+    const payload = {
+      RiskTitle: risk.riskTitle,
+      RiskDescription: risk.riskDescription,
+      RiskCategory: risk.riskCategory,
+      Likelihood: risk.likelihood,
+      Impact: risk.impact,
+      Status: risk.status,
+      MitigationPlan: risk.mitigationPlan,
+      AssignedToUserID: risk.assignedToId
+    };
+    
+    return this.con.updateRisk(id, payload);
   }
 
   getRiskDashboard(): Observable<RiskDashboard> {
-    return this.api.getRiskDashboard()
+    return this.getRisks().pipe(
+      map((risks: Risk[]) => {
+        const totalRisks = risks.length;
+        const criticalRisks = risks.filter(risk => risk.riskScore >= 15).length;
+        const highRisks = risks.filter(risk => risk.riskScore >= 10 && risk.riskScore < 15).length;
+        const openRisks = risks.filter(risk => risk.status === 'Open').length;
+        
+        const risksByCategory: { [key: string]: number } = {};
+        risks.forEach(risk => {
+          risksByCategory[risk.riskCategory] = (risksByCategory[risk.riskCategory] || 0) + 1;
+        });
+
+        return {
+          totalRisks,
+          criticalRisks,
+          highRisks,
+          openRisks,
+          risksByCategory
+        };
+      })
+    );
+  }
+
+  private mapApiRiskToRisk(apiRisk: any): Risk {
+    const likelihood = apiRisk.likelihood || 1;
+    const impact = apiRisk.impact || 1;
+    
+    return {
+      id: apiRisk.riskID,
+      contractId: apiRisk.contractID,
+      contractTitle: apiRisk.contractTitle,
+      riskTitle: apiRisk.riskTitle,
+      riskDescription: apiRisk.riskDescription,
+      riskCategory: apiRisk.riskCategory,
+      likelihood: likelihood,
+      impact: impact,
+      riskScore: likelihood * impact,
+      status: apiRisk.status || 'Open',
+      mitigationPlan: apiRisk.mitigationPlan,
+      assignedToId: apiRisk.assignedToUserID,
+      assignedToName: apiRisk.assignedToName,
+      createdDate: new Date(apiRisk.createdDate || apiRisk.lastUpdated || new Date()),
+      lastUpdated: new Date(apiRisk.lastUpdated || new Date())
+    };
   }
 
   getRiskCategories(): string[] {

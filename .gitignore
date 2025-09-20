@@ -1,2 +1,5 @@
-node_modules
-.angular
+/node_modules
+/dist
+/.angular
+*.log
+package-lock.json

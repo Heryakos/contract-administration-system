@@ -6,45 +6,59 @@ import { DashboardComponent } from "./components/dashboard/dashboard.component"
 import { ContractsListComponent } from "./components/contracts/contracts-list/contracts-list.component"
 import { ContractDetailComponent } from "./components/contracts/contract-detail/contract-detail.component"
 import { ContractFormComponent } from "./components/contracts/contract-form/contract-form.component"
-import { ContractGeneratorComponent } from "./modules/contracts-generator/contracts-generator.module" // component file contains the component class
+import { AuthGuard } from "./guards/auth.guard"
+// import { ContractGeneratorComponent } from "./modules/contracts-generator/contracts-generator.module"
 
 const routes: Routes = [
   { path: "login", component: LoginComponent },
   {
     path: "",
     component: MainLayoutComponent,
-    // canActivate: [AuthGuard],
+    canActivate: [AuthGuard],
     children: [
       { path: "", redirectTo: "/dashboard", pathMatch: "full" },
       { path: "dashboard", component: DashboardComponent },
       { path: "contracts", component: ContractsListComponent },
-      { path: "contracts/generator", component: ContractGeneratorComponent },
-      // Route new and edit to the generator component
-      { path: "contracts/new", component: ContractGeneratorComponent },
-      { path: "contracts/:id/edit", component: ContractGeneratorComponent },
-      { path: "contracts/edit/:id", component: ContractGeneratorComponent },
+      { path: "contracts/new", component: ContractFormComponent },
       { path: "contracts/:id", component: ContractDetailComponent },
-      {
-        path: "approvals",
-        loadChildren: () => import("./modules/approvals/approvals.module").then((m) => m.ApprovalsModule),
+      { 
+        path: "contract-generator", 
+        loadChildren: () => import('./modules/contracts-generator/contracts-generator.module').then(m => m.ContractsGeneratorModule)
+      },
+      { 
+        path: "clause-generator", 
+        loadChildren: () => import('./modules/clause-generator/clause-generator.module').then(m => m.ClauseGeneratorModule)
+      },
+      { 
+        path: "template-generator", 
+        loadChildren: () => import('./modules/template-generator/template-generator.module').then(m => m.TemplateGeneratorModule)
       },
       {
-        path: "obligations",
-        loadChildren: () => import("./modules/obligations/obligations.module").then((m) => m.ObligationsModule),
+        path: "approvals",
+        loadChildren: () => import("./modules/approvals/approvals.module").then(m => m.ApprovalsModule)
       },
       {
         path: "financial",
-        loadChildren: () => import("./modules/financial/financial.module").then((m) => m.FinancialModule),
+        loadChildren: () => import("./modules/financial/financial.module").then(m => m.FinancialModule)
       },
-      { path: "risks", loadChildren: () => import("./modules/risks/risks.module").then((m) => m.RisksModule) },
-      { path: "reports", loadChildren: () => import("./modules/reports/reports.module").then((m) => m.ReportsModule) },
-    ],
-  },
-  { path: "**", redirectTo: "/dashboard" },
+      {
+        path: "obligations",
+        loadChildren: () => import("./modules/obligations/obligations.module").then(m => m.ObligationsModule)
+      },
+      {
+        path: "risks",
+        loadChildren: () => import("./modules/risks/risks.module").then(m => m.RisksModule)
+      },
+      {
+        path: "reports",
+        loadChildren: () => import("./modules/reports/reports.module").then(m => m.ReportsModule)
+      }
+    ]
+  }
 ]
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule],
+  exports: [RouterModule]
 })
 export class AppRoutingModule {}

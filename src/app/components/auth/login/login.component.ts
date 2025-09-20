@@ -2,7 +2,6 @@ import { Component, type OnInit } from "@angular/core"
 import { FormBuilder, FormGroup, Validators } from "@angular/forms"
 import { Router, ActivatedRoute } from "@angular/router"
 import { MatSnackBar } from "@angular/material/snack-bar"
-import { AuthService } from "../../../services/auth.service"
 
 @Component({
   selector: "app-login",
@@ -17,7 +16,6 @@ export class LoginComponent implements OnInit {
 
   constructor(
     private formBuilder: FormBuilder,
-    private authService: AuthService,
     private router: Router,
     private route: ActivatedRoute,
     private snackBar: MatSnackBar,
@@ -29,13 +27,11 @@ export class LoginComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Auto-login (bypass form)
     const target = this.route.snapshot.queryParams["returnUrl"] || "/dashboard"
     this.router.navigate([target])
   }
 
   onSubmit(): void {
-    // no-op during auto-login mode
     this.router.navigate([this.returnUrl])
   }
 

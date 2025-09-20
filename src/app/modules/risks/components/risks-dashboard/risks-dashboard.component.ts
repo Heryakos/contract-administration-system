@@ -1,6 +1,7 @@
-import { Component, type OnInit } from "@angular/core"
+import { Component, OnInit } from "@angular/core"
 import { RiskService, type RiskDashboard } from "../../services/risk.service"
 import { ComplianceService, type ComplianceDashboard } from "../../services/compliance.service"
+import { forkJoin } from "rxjs"
 
 @Component({
   selector: "app-risks-dashboard",
@@ -26,20 +27,26 @@ export class RisksDashboardComponent implements OnInit {
     this.loading = true
     this.error = null
 
-    Promise.all([
-      this.riskService.getRiskDashboard().toPromise(),
-      this.complianceService.getComplianceDashboard().toPromise(),
-    ])
-      .then(([riskData, complianceData]) => {
-        this.riskDashboard = riskData!
-        this.complianceDashboard = complianceData!
+    console.log('Loading dashboard data...');
+
+    forkJoin([
+      this.riskService.getRiskDashboard(),
+      this.complianceService.getComplianceDashboard()
+    ]).subscribe({
+      next: ([riskData, complianceData]) => {
+        console.log('Risk dashboard data:', riskData);
+        console.log('Compliance dashboard data:', complianceData);
+        
+        this.riskDashboard = riskData
+        this.complianceDashboard = complianceData
         this.loading = false
-      })
-      .catch((error) => {
+      },
+      error: (error) => {
         console.error("Error loading dashboard data:", error)
-        this.error = "Failed to load dashboard data"
+        this.error = "Failed to load dashboard data. Please check console for details."
         this.loading = false
-      })
+      }
+    })
   }
 
   getRiskCategoryEntries(): Array<[string, number]> {

@@ -124,6 +124,54 @@
                       </mat-form-field>
                     </div>
 
+                    <!-- Additional Fields -->
+                    <mat-form-field appearance="outline" class="form-field">
+                      <mat-label>Contract Type</mat-label>
+                      <mat-select formControlName="contractTypeID">
+                        <mat-option *ngFor="let type of contractTypes" [value]="type.contractTypeID">
+                          {{ type.typeName }}
+                        </mat-option>
+                      </mat-select>
+                      <mat-icon matSuffix>category</mat-icon>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="form-field">
+                      <mat-label>Category</mat-label>
+                      <mat-select formControlName="categoryID">
+                        <mat-option *ngFor="let category of contractCategories" [value]="category.categoryID">
+                          {{ category.categoryName }}
+                        </mat-option>
+                      </mat-select>
+                      <mat-icon matSuffix>label</mat-icon>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="form-field">
+                      <mat-label>Vendor</mat-label>
+                      <mat-select formControlName="vendorID">
+                        <mat-option value="">Select Vendor</mat-option>
+                        <mat-option *ngFor="let vendor of vendors" [value]="vendor.vendorID">
+                          {{ vendor.vendorName }}
+                        </mat-option>
+                      </mat-select>
+                      <mat-icon matSuffix>business</mat-icon>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="form-field">
+                      <mat-label>Risk Level</mat-label>
+                      <mat-select formControlName="riskLevel">
+                        <mat-option *ngFor="let level of riskLevels" [value]="level">
+                          {{ level }}
+                        </mat-option>
+                      </mat-select>
+                      <mat-icon matSuffix>warning</mat-icon>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="form-field">
+                      <mat-label>Duration (months)</mat-label>
+                      <input matInput type="number" formControlName="duration" placeholder="12">
+                      <mat-icon matSuffix>calendar_today</mat-icon>
+                    </mat-form-field>
+
                     <button mat-raised-button type="button" (click)="applyMergeFields()" color="primary" class="merge-button">
                       <mat-icon>auto_fix_high</mat-icon>
                       Apply Merge Fields

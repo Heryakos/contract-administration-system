@@ -1,6 +1,6 @@
 import { NgModule } from "@angular/core"
 import { CommonModule } from "@angular/common"
-import { RouterModule, type Routes } from "@angular/router"
+import { RouterModule, Routes } from "@angular/router"
 import { ReactiveFormsModule, FormsModule } from "@angular/forms"
 
 // Angular Material Imports
@@ -20,11 +20,16 @@ import { MatDatepickerModule } from "@angular/material/datepicker"
 import { MatNativeDateModule } from "@angular/material/core"
 import { MatTabsModule } from "@angular/material/tabs"
 import { MatGridListModule } from "@angular/material/grid-list"
+import { MatTooltipModule } from "@angular/material/tooltip"
 
 // Components
 import { RisksDashboardComponent } from "./components/risks-dashboard/risks-dashboard.component"
 import { RisksListComponent } from "./components/risks-list/risks-list.component"
 import { RiskFormDialogComponent } from "./components/risk-form-dialog/risk-form-dialog.component"
+
+// Services
+import { RiskService } from "./services/risk.service"
+import { ComplianceService } from "./services/compliance.service"
 
 const routes: Routes = [
   { path: "", component: RisksDashboardComponent },
@@ -32,7 +37,11 @@ const routes: Routes = [
 ]
 
 @NgModule({
-  declarations: [RisksDashboardComponent, RisksListComponent, RiskFormDialogComponent],
+  declarations: [
+    RisksDashboardComponent, 
+    RisksListComponent, 
+    RiskFormDialogComponent
+  ],
   imports: [
     CommonModule,
     RouterModule.forChild(routes),
@@ -54,6 +63,11 @@ const routes: Routes = [
     MatNativeDateModule,
     MatTabsModule,
     MatGridListModule,
+    MatTooltipModule
   ],
+  providers: [
+    RiskService,
+    ComplianceService
+  ]
 })
 export class RisksModule {}

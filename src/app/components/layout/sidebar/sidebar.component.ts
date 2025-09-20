@@ -1,6 +1,5 @@
 import { Component, type OnInit } from "@angular/core"
 import { Router } from "@angular/router"
-import { AuthService } from "../../../services/auth.service"
 
 interface MenuItem {
   label: string
@@ -17,26 +16,64 @@ interface MenuItem {
 })
 export class SidebarComponent implements OnInit {
   menuItems: MenuItem[] = [
-    { label: "Dashboard", icon: "dashboard", route: "/dashboard" },
-    { label: "Contracts", icon: "description", route: "/contracts" },
-    // { label: "Contract Generator", icon: "build", route: "/contracts/generator" },
-    { label: "Approvals", icon: "approval", route: "/approvals", roles: ["Admin", "Legal", "Finance"] },
-    { label: "Obligations", icon: "assignment", route: "/obligations" },
-    { label: "Financial", icon: "account_balance", route: "/financial", roles: ["Admin", "Finance"] },
-    { label: "Risk & Compliance", icon: "security", route: "/risks", roles: ["Admin", "Legal"] },
-    { label: "Reports", icon: "analytics", route: "/reports" },
-  ]
+    {
+      label: 'Dashboard',
+      icon: 'dashboard',
+      route: '/dashboard'
+    },
+    {
+      label: 'Contracts',
+      icon: 'description',
+      route: '/contracts'
+    },
+    {
+      label: 'Contract Generator',
+      icon: 'add_box',
+      route: '/contract-generator'
+    },
+    {
+      label: 'Clause Generator',
+      icon: 'library_add',
+      route: '/clause-generator'
+    },
+    {
+      label: 'Template Generator',
+      icon: 'create_new_folder',
+      route: '/template-generator'
+    },
+    {
+      label: 'Approvals',
+      icon: 'approval',
+      route: '/approvals'
+    },
+    {
+      label: 'Financial',
+      icon: 'attach_money',
+      route: '/financial'
+    },
+    {
+      label: 'Obligations',
+      icon: 'assignment',
+      route: '/obligations'
+    },
+    {
+      label: 'Risks',
+      icon: 'warning',
+      route: '/risks'
+    },
+    {
+      label: 'Reports',
+      icon: 'assessment',
+      route: '/reports'
+    }
+  ];
 
-  constructor(
-    private router: Router,
-    private authService: AuthService,
-  ) {}
+  constructor(private router: Router) {}
 
   ngOnInit(): void {}
 
   hasAccess(item: MenuItem): boolean {
-    if (!item.roles || item.roles.length === 0) return true
-    return this.authService.hasAnyRole(item.roles)
+    return true
   }
 
   navigate(route: string): void {

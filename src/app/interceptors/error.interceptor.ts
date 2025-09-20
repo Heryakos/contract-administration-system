@@ -3,14 +3,10 @@ import { type HttpInterceptor, type HttpRequest, type HttpHandler, type HttpEven
 import { type Observable, throwError } from "rxjs"
 import { catchError } from "rxjs/operators"
 import { MatSnackBar } from "@angular/material/snack-bar"
-import { AuthService } from "../services/auth.service"
 
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {
-  constructor(
-    private snackBar: MatSnackBar,
-    private authService: AuthService,
-  ) {}
+  constructor(private snackBar: MatSnackBar) {}
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     return next.handle(req).pipe(
@@ -18,17 +14,14 @@ export class ErrorInterceptor implements HttpInterceptor {
         let errorMessage = "An error occurred"
 
         if (error.error instanceof ErrorEvent) {
-          // Client-side error
           errorMessage = error.error.message
         } else {
-          // Server-side error
           switch (error.status) {
             case 401:
-              this.authService.logout()
-              errorMessage = "Unauthorized access. Please login again."
+              errorMessage = "Unauthorized access."
               break
             case 403:
-              errorMessage = "Access forbidden. You do not have permission."
+              errorMessage = "Access forbidden."
               break
             case 404:
               errorMessage = "Resource not found."

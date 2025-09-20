@@ -54,8 +54,8 @@ import { ErrorInterceptor } from "./interceptors/error.interceptor";
 import { ClauseLibraryDialogComponent } from './components/contracts/clause-library-dialog/clause-library-dialog.component';
 import { ContractPreviewComponent } from './components/contracts/contract-preview/contract-preview.component';
 import { TemplateLibraryDialogComponent } from './components/contracts/template-library-dialog/template-library-dialog.component';
-import { ContractGeneratorComponent } from './modules/contracts-generator/contracts-generator.module';
 import { AddClauseDialogComponent } from './components/contracts/add-clause-dialog/add-clause-dialog.component';
+import { NgApexchartsModule } from "ng-apexcharts";
 
 @NgModule({
   declarations: [
@@ -71,8 +71,8 @@ import { AddClauseDialogComponent } from './components/contracts/add-clause-dial
     ClauseLibraryDialogComponent,
     ContractPreviewComponent,
     TemplateLibraryDialogComponent,
-    ContractGeneratorComponent,
     AddClauseDialogComponent,
+
   ],
   imports: [
     BrowserModule,
@@ -112,6 +112,7 @@ import { AddClauseDialogComponent } from './components/contracts/add-clause-dial
     MatSliderModule,
     MatDividerModule,
     DragDropModule,
+    NgApexchartsModule,
   ],
   providers: [
     {

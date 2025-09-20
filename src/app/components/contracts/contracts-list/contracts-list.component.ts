@@ -112,6 +112,7 @@ export class ContractsListComponent implements OnInit {
       search: this.searchControl.value || undefined,
       status: this.statusFilter.value || undefined,
       vendorId: this.vendorFilter.value || undefined,
+      typeId: this.typeFilter.value || undefined,
     }
 
     this.contractService.getContracts(params).subscribe({

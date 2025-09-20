@@ -1,4 +1,4 @@
-import { Component, type OnInit, ViewChild } from "@angular/core"
+import { Component, OnInit, ViewChild } from "@angular/core"
 import { MatTableDataSource } from "@angular/material/table"
 import { MatPaginator } from "@angular/material/paginator"
 import { MatSort } from "@angular/material/sort"
@@ -52,6 +52,7 @@ export class RisksListComponent implements OnInit {
   ngAfterViewInit(): void {
     this.dataSource.paginator = this.paginator
     this.dataSource.sort = this.sort
+    this.dataSource.filterPredicate = this.createFilter();
   }
 
   loadRisks(): void {
@@ -62,15 +63,26 @@ export class RisksListComponent implements OnInit {
       .getRisks(undefined, this.selectedCategory || undefined, this.selectedStatus || undefined)
       .subscribe({
         next: (risks) => {
+          console.log('Loaded risks:', risks);
           this.dataSource.data = risks
           this.loading = false
         },
         error: (error) => {
           console.error("Error loading risks:", error)
-          this.error = "Failed to load risks"
+          this.error = "Failed to load risks. Please check console for details."
           this.loading = false
         },
       })
+  }
+
+  createFilter(): (data: Risk, filter: string) => boolean {
+    return (data: Risk, filter: string): boolean => {
+      const searchStr = filter.toLowerCase();
+      return data.riskTitle.toLowerCase().includes(searchStr) ||
+             data.riskDescription?.toLowerCase().includes(searchStr) ||
+             data.riskCategory.toLowerCase().includes(searchStr) ||
+             data.status.toLowerCase().includes(searchStr);
+    };
   }
 
   applyFilter(): void {

@@ -7,18 +7,13 @@
 
   <span class="spacer"></span>
 
-  <ng-container *ngIf="currentUser$ | async as user; else loggedOut">
+  <ng-container *ngIf="currentEmployee$ | async as emp">
     <div class="user-info">
-      <mat-icon>account_circle</mat-icon>
+      <!-- <mat-icon>account_circle</mat-icon> -->
       <div class="user-details">
-        <div class="user-name">{{ user.fullName || user.username }}</div>
-        <div class="user-role">{{ user.roles && user.roles.length ? user.roles[0].roleName : '' }}</div>
+        <div class="user-name">{{ emp.en_name || (emp.fName + ' ' + emp.lName) || emp.employee_Id }}</div>
+        <!-- <div class="user-role">{{ emp.emplyee_Type_Posting_Group }}</div> -->
       </div>
-      <button mat-button (click)="logout()">Logout</button>
     </div>
   </ng-container>
-
-  <ng-template #loggedOut>
-    <button mat-button routerLink="/login">Login</button>
-  </ng-template>
 </mat-toolbar>

@@ -1,6 +1,7 @@
 import { Injectable } from "@angular/core"
-import type { Observable } from "rxjs"
-import { ApiService } from "../../../services/api.service"
+import { Observable } from "rxjs"
+import { map } from "rxjs/operators"
+import { ConService } from "../../../services/con.service"
 
 export interface ComplianceRequirement {
   id: number
@@ -13,7 +14,7 @@ export interface ComplianceRequirement {
   status: string
   evidenceRequired?: string
   evidenceProvided?: string
-  assignedToId?: number
+  assignedToId?: string
   assignedToName?: string
   createdDate: Date
   completedDate?: Date
@@ -53,26 +54,105 @@ export interface ComplianceDashboard {
   providedIn: "root",
 })
 export class ComplianceService {
-  constructor(private api: ApiService) {}
+  constructor(private con: ConService) {}
 
   getComplianceRequirements(contractId?: number, type?: string, status?: string): Observable<ComplianceRequirement[]> {
-    return this.api.getComplianceRequirements({ contractId, type, status })
+    return this.con.getComplianceRequirements({ contractId, type, status }).pipe(
+      map((apiRequirements: any[]) => {
+        console.log('API Compliance response:', apiRequirements);
+        return apiRequirements.map(req => this.mapApiRequirementToRequirement(req));
+      })
+    );
   }
 
   getComplianceRequirement(id: number): Observable<ComplianceRequirement> {
-    return this.api.getComplianceRequirement(id)
+    return this.con.getComplianceRequirement(id).pipe(
+      map(apiReq => this.mapApiRequirementToRequirement(apiReq))
+    );
   }
 
   createComplianceRequirement(requirement: CreateComplianceRequirement): Observable<ComplianceRequirement> {
-    return this.api.createComplianceRequirement(requirement)
+    const payload: any = { 
+      ContractID: requirement.contractId, 
+      RequirementTitle: requirement.requirementTitle, 
+      RequirementDescription: requirement.requirementDescription, 
+      RequirementType: requirement.requirementType, 
+      DueDate: requirement.dueDate, 
+      EvidenceRequired: requirement.evidenceRequired, 
+      AssignedToUserID: requirement.assignedToId 
+    }
+    return this.con.createComplianceRequirement(payload).pipe(
+      map(apiReq => this.mapApiRequirementToRequirement(apiReq))
+    );
   }
 
   updateComplianceRequirement(id: number, requirement: UpdateComplianceRequirement): Observable<void> {
-    return this.api.updateComplianceRequirement(id, requirement)
+    const payload: any = { 
+      RequirementTitle: requirement.requirementTitle, 
+      RequirementDescription: requirement.requirementDescription, 
+      RequirementType: requirement.requirementType, 
+      DueDate: requirement.dueDate, 
+      Status: requirement.status, 
+      EvidenceRequired: requirement.evidenceRequired, 
+      EvidenceProvided: requirement.evidenceProvided, 
+      AssignedToUserID: requirement.assignedToId 
+    }
+    return this.con.updateComplianceRequirement(id, payload);
   }
 
   getComplianceDashboard(): Observable<ComplianceDashboard> {
-    return this.api.getComplianceDashboard()
+    return this.getComplianceRequirements().pipe(
+      map((requirements: ComplianceRequirement[]) => {
+        const totalRequirements = requirements.length;
+        const completedRequirements = requirements.filter(req => req.status === 'Completed').length;
+        const now = new Date();
+        const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+        
+        const overdueRequirements = requirements.filter(req => 
+          new Date(req.dueDate) < now && req.status !== 'Completed'
+        ).length;
+        
+        const dueSoon = requirements.filter(req => {
+          const dueDate = new Date(req.dueDate);
+          return dueDate > now && dueDate <= sevenDaysFromNow && req.status !== 'Completed';
+        }).length;
+        
+        const complianceRate = totalRequirements > 0 ? (completedRequirements / totalRequirements) * 100 : 0;
+
+        const requirementsByType: { [key: string]: number } = {};
+        requirements.forEach(req => {
+          requirementsByType[req.requirementType] = (requirementsByType[req.requirementType] || 0) + 1;
+        });
+
+        return {
+          totalRequirements,
+          completedRequirements,
+          overdueRequirements,
+          dueSoon,
+          complianceRate,
+          requirementsByType
+        };
+      })
+    );
+  }
+
+  private mapApiRequirementToRequirement(apiReq: any): ComplianceRequirement {
+    return {
+      id: apiReq.requirementID,
+      contractId: apiReq.contractID,
+      contractTitle: apiReq.contractTitle,
+      requirementTitle: apiReq.requirementTitle,
+      requirementDescription: apiReq.requirementDescription,
+      requirementType: apiReq.requirementType,
+      dueDate: new Date(apiReq.dueDate),
+      status: apiReq.status || 'Pending',
+      evidenceRequired: apiReq.evidenceRequired,
+      evidenceProvided: apiReq.evidenceProvided,
+      assignedToId: apiReq.assignedToUserID,
+      assignedToName: apiReq.assignedToName,
+      createdDate: new Date(apiReq.createdDate || new Date()),
+      completedDate: apiReq.completedDate ? new Date(apiReq.completedDate) : undefined
+    };
   }
 
   getRequirementTypes(): string[] {

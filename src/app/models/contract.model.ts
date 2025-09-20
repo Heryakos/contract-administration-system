@@ -1,3 +1,5 @@
+// In contract.model.ts
+
 export interface Contract {
   contractID: string
   contractNumber: string
@@ -20,6 +22,12 @@ export interface Contract {
   daysToExpiry: number
   expiryStatus: string
   completionPercentage: number
+  contractTypeID?: string;
+  categoryID?: string;
+  vendorID?: string;
+  documents?: ContractDocument[]
+  createdByUserID?: string; // Add this
+  modifiedByUserID?: string; // Add this
 }
 
 export interface CreateContract {
@@ -34,7 +42,12 @@ export interface CreateContract {
   endDate?: Date
   description?: string
   riskLevel: string
+  status?: string // Add this
+  version?: string // Add this
+  createdByUserID?: string // Add this
 }
+
+// In contract.model.ts
 
 export interface UpdateContract {
   contractTitle: string
@@ -48,6 +61,9 @@ export interface UpdateContract {
   description?: string
   riskLevel: string
   status: string
+  version: string
+  modifiedByUserID: string
+  createdByUserID?: string // Add this for completeness
 }
 
 export interface ContractSummary {
@@ -86,4 +102,15 @@ export interface ContractCategory {
   categoryName: string
   description?: string
   isActive: boolean
+}
+
+export interface ContractDocument {
+  documentId: number
+  contractId: number
+  fileName: string
+  fileType?: string
+  fileSize?: number
+  uploadedByUserID?: string
+  uploadedDate?: Date
+  url?: string
 }

@@ -1,4 +1,4 @@
-import { Component, type OnInit, Inject } from "@angular/core"
+import { Component, OnInit, Inject } from "@angular/core"
 import { FormBuilder, FormGroup, Validators } from "@angular/forms"
 import { MatDialogRef, MAT_DIALOG_DATA } from "@angular/material/dialog"
 import { RiskService, type Risk, type CreateRisk, type UpdateRisk } from "../../services/risk.service"
@@ -26,7 +26,6 @@ export class RiskFormDialogComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private riskService: RiskService,
-    // private contractService: ContractService,
     private dialogRef: MatDialogRef<RiskFormDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: DialogData,
   ) {
@@ -36,7 +35,6 @@ export class RiskFormDialogComponent implements OnInit {
   ngOnInit(): void {
     this.categories = this.riskService.getRiskCategories()
     this.statuses = this.riskService.getRiskStatuses()
-    // this.loadContracts()
 
     if (this.data.mode === "edit" && this.data.risk) {
       this.populateForm(this.data.risk)
@@ -70,17 +68,6 @@ export class RiskFormDialogComponent implements OnInit {
       assignedToId: risk.assignedToId,
     })
   }
-
-  // private loadContracts(): void {
-  //   this.contractService.getContracts().subscribe({
-  //     next: (contracts) => {
-  //       this.contracts = contracts
-  //     },
-  //     error: (error) => {
-  //       console.error("Error loading contracts:", error)
-  //     },
-  //   })
-  // }
 
   getRiskScore(): number {
     const likelihood = this.riskForm.get("likelihood")?.value || 1
@@ -118,7 +105,7 @@ export class RiskFormDialogComponent implements OnInit {
           },
           error: (error) => {
             console.error("Error creating risk:", error)
-            this.error = "Failed to create risk"
+            this.error = "Failed to create risk. Please check console for details."
             this.loading = false
           },
         })
@@ -141,7 +128,7 @@ export class RiskFormDialogComponent implements OnInit {
           },
           error: (error) => {
             console.error("Error updating risk:", error)
-            this.error = "Failed to update risk"
+            this.error = "Failed to update risk. Please check console for details."
             this.loading = false
           },
         })
