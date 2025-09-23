@@ -1,0 +1,59 @@
+<mat-card>
+  <h2>Obligations Dashboard</h2>
+  <div *ngIf="loading">Loading...</div>
+  <div *ngIf="!loading">
+    <div class="grid">
+      <mat-card class="panel span-2">
+        <div class="panel-title">Overview</div>
+        <div class="kpis">
+          <div class="kpi">
+            <div class="label">Total</div>
+            <div class="value">{{ totals?.TotalObligations || 0 }}</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Completed</div>
+            <div class="value primary">{{ totals?.Completed || 0 }}</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Pending</div>
+            <div class="value accent">{{ totals?.Pending || 0 }}</div>
+          </div>
+          <div class="kpi">
+            <div class="label">Overdue</div>
+            <div class="value warn">{{ totals?.Overdue || 0 }}</div>
+          </div>
+        </div>
+      </mat-card>
+
+      <mat-card class="panel">
+        <div class="panel-title">By Type</div>
+        <table mat-table [dataSource]="byType" class="mat-elevation-z1">
+          <ng-container matColumnDef="ObligationType">
+            <th mat-header-cell *matHeaderCellDef> Type </th>
+            <td mat-cell *matCellDef="let row"> {{ row.ObligationType }} </td>
+          </ng-container>
+          <ng-container matColumnDef="CountByType">
+            <th mat-header-cell *matHeaderCellDef> Count </th>
+            <td mat-cell *matCellDef="let row"> {{ row.CountByType }} </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="['ObligationType','CountByType']"></tr>
+          <tr mat-row *matRowDef="let row; columns: ['ObligationType','CountByType']"></tr>
+        </table>
+      </mat-card>
+
+      <mat-card class="panel">
+        <div class="panel-title">Status Breakdown</div>
+        <canvas baseChart
+          [data]="{
+            labels: ['Completed','Pending','Overdue'],
+            datasets: [{
+              data: [totals?.Completed||0, totals?.Pending||0, totals?.Overdue||0],
+              backgroundColor: ['#2e7d32','#1976d2','#d32f2f']
+            }]
+          }"
+          [type]="'doughnut'">
+        </canvas>
+      </mat-card>
+    </div>
+  </div>
+</mat-card> 

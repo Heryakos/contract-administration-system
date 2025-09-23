@@ -55,7 +55,7 @@ export class ReportsDashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.con.getReportsDashboard().subscribe({
-      next: (res) => {
+      next: (res: any) => {
         // Normalize contracts
         const c = res?.contracts?.[0] || null
         this.contracts = c

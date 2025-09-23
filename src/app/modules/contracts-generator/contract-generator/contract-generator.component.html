@@ -1,0 +1,734 @@
+<!-- Enhanced Header with Professional Styling -->
+<div class="contract-generator">
+  <mat-toolbar class="header-toolbar">
+    <div class="toolbar-content">
+      <div class="title-section">
+        <h1 class="main-title">Contract Generator</h1>
+        <p class="subtitle">Advanced contract creation and management</p>
+      </div>
+      <div class="actions-section">
+        <button mat-stroked-button (click)="runComplianceCheck()" class="action-btn">
+          <mat-icon>security</mat-icon>
+          Compliance Check
+        </button>
+        <button mat-stroked-button (click)="togglePreview()" class="action-btn">
+          <mat-icon>{{ showPreview ? 'visibility_off' : 'visibility' }}</mat-icon>
+          {{ showPreview ? 'Hide' : 'Show' }} Preview
+        </button>
+        <button mat-stroked-button (click)="applyMergeFields()" class="action-btn">
+          <mat-icon>merge</mat-icon>
+          Apply Merge Fields
+        </button>
+      </div>
+    </div>
+  </mat-toolbar>
+
+  <div class="content-container">
+    <!-- Use mat-accordion for collapsible sections instead of tabs for better UX -->
+    <mat-accordion class="main-accordion" multi>
+      <!-- Contract Details Section -->
+      <mat-expansion-panel [expanded]="true">
+        <mat-expansion-panel-header>
+          <mat-panel-title>Contract Details</mat-panel-title>
+          <mat-panel-description>Basic contract details and metadata</mat-panel-description>
+        </mat-expansion-panel-header>
+        <div class="tab-content">
+          <mat-card class="form-card">
+            <mat-card-header>
+              <mat-card-title>Contract Information</mat-card-title>
+              <mat-card-subtitle>Basic contract details and metadata</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <form [formGroup]="metadataForm" class="metadata-form">
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Party A</mat-label>
+                    <input matInput formControlName="partyA" placeholder="Enter Party A name">
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Party B</mat-label>
+                    <input matInput formControlName="partyB" placeholder="Enter Party B name">
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Contract Value</mat-label>
+                    <input matInput type="number" formControlName="contractValue" placeholder="0.00">
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="quarter-width">
+                    <mat-label>Currency</mat-label>
+                    <mat-select formControlName="currency">
+                      <mat-option *ngFor="let currency of currencies" [value]="currency">
+                        {{ currency }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="quarter-width">
+                    <mat-label>Risk Level</mat-label>
+                    <mat-select formControlName="riskLevel">
+                      <mat-option *ngFor="let level of riskLevels" [value]="level">
+                        {{ level }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Effective Date</mat-label>
+                    <input matInput [matDatepicker]="effectiveDatePicker" formControlName="effectiveDate">
+                    <mat-datepicker-toggle matSuffix [for]="effectiveDatePicker"></mat-datepicker-toggle>
+                    <mat-datepicker #effectiveDatePicker></mat-datepicker>
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Duration (months)</mat-label>
+                    <input matInput type="number" formControlName="duration" placeholder="12">
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Contract Type</mat-label>
+                    <mat-select formControlName="contractTypeID">
+                      <mat-option *ngFor="let type of contractTypes" [value]="type.contractTypeID">
+                        {{ type.typeName }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Category</mat-label>
+                    <mat-select formControlName="categoryID">
+                      <mat-option *ngFor="let category of contractCategories" [value]="category.categoryID">
+                        {{ category.categoryName }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Vendor</mat-label>
+                    <mat-select formControlName="vendorID">
+                      <mat-option *ngFor="let vendor of vendors" [value]="vendor.vendorID">
+                        {{ vendor.vendorName }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Jurisdiction</mat-label>
+                    <mat-select formControlName="jurisdiction">
+                      <mat-option *ngFor="let jurisdiction of jurisdictions" [value]="jurisdiction.value">
+                        {{ jurisdiction.label }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+              </form>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-expansion-panel>
+
+      <!-- Contract Builder Section -->
+      <mat-expansion-panel [expanded]="true">
+        <mat-expansion-panel-header>
+          <mat-panel-title>Contract Builder</mat-panel-title>
+          <mat-panel-description>Build your contract by adding and arranging blocks</mat-panel-description>
+        </mat-expansion-panel-header>
+        <div class="tab-content">
+          <div class="builder-container">
+            <div class="builder-sidebar">
+              <mat-card class="blocks-card">
+                <mat-card-header>
+                  <mat-card-title>Contract Blocks</mat-card-title>
+                  <mat-card-subtitle>Drag and drop to build your contract</mat-card-subtitle>
+                </mat-card-header>
+                <mat-card-content>
+                  <div class="block-types">
+                    <button 
+                      *ngFor="let blockType of blockTypes" 
+                      mat-stroked-button 
+                      (click)="onAddElement(blockType.type)"
+                      class="block-type-btn">
+                      <mat-icon>{{ blockType.icon }}</mat-icon>
+                      {{ blockType.label }}
+                    </button>
+                  </div>
+                  
+                  <div class="library-actions">
+                    <button mat-stroked-button (click)="openClauseLibrary()" class="library-btn">
+                      <mat-icon>library_books</mat-icon>
+                      Clause Library
+                    </button>
+                    <button mat-stroked-button (click)="openTemplateLibrary()" class="library-btn">
+                      <mat-icon>folder_open</mat-icon>
+                      Template Library
+                    </button>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+
+              <mat-card class="compliance-card" *ngIf="complianceIssues.length > 0">
+                <mat-card-header>
+                  <mat-card-title>Compliance Issues</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <div class="compliance-issues">
+                    <div 
+                      *ngFor="let issue of complianceIssues" 
+                      class="compliance-issue"
+                      [class]="'issue-' + issue.type">
+                      <mat-icon [color]="getComplianceIssueColor(issue.type)">
+                        {{ getComplianceIssueIcon(issue.type) }}
+                      </mat-icon>
+                      <div class="issue-content">
+                        <div class="issue-title">{{ issue.field || 'Issue' }}</div>
+                        <div class="issue-description">{{ issue.message }}</div>
+                      </div>
+                    </div>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+            </div>
+
+            <div class="builder-main">
+              <mat-card class="contract-builder-card">
+                <mat-card-header>
+                  <mat-card-title>Contract Builder</mat-card-title>
+                  <mat-card-subtitle>Build your contract by adding and arranging blocks</mat-card-subtitle>
+                </mat-card-header>
+                <mat-card-content>
+                  <div 
+                    cdkDropList 
+                    (cdkDropListDropped)="onDrop($event)"
+                    class="contract-blocks">
+                    <div 
+                      *ngFor="let block of blocks; let i = index" 
+                      cdkDrag
+                      class="contract-block"
+                      [class.required]="block.required">
+                      <div class="block-header">
+                        <div class="block-info">
+                          <mat-icon>{{ getBlockIcon(block.type) }}</mat-icon>
+                          <span class="block-type">{{ getBlockLabel(block.type) }}</span>
+                          <span class="block-id">#{{ i + 1 }}</span>
+                          <mat-chip *ngIf="block.required" class="required-chip">Required</mat-chip>
+                        </div>
+                        <div class="block-actions">
+                          <button mat-icon-button (click)="duplicateBlock(block)" matTooltip="Duplicate">
+                            <mat-icon>content_copy</mat-icon>
+                          </button>
+                          <button mat-icon-button (click)="removeBlock(block.id)" matTooltip="Remove" color="warn">
+                            <mat-icon>delete</mat-icon>
+                          </button>
+                        </div>
+                      </div>
+
+                      <div class="block-content">
+                        <!-- Heading Block -->
+                        <div *ngIf="block.type === 'heading'" class="block-editor">
+                          <mat-form-field appearance="outline" class="block-label-field">
+                            <mat-label>Heading Text</mat-label>
+                            <input matInput [(ngModel)]="block.label" (ngModelChange)="updateBlock(block.id, {label: $event})">
+                          </mat-form-field>
+                          <mat-form-field appearance="outline" class="block-value-field">
+                            <mat-label>Heading Value</mat-label>
+                            <input matInput [(ngModel)]="block.value" (ngModelChange)="updateBlock(block.id, {value: $event})">
+                          </mat-form-field>
+                          <div class="block-options">
+                            <mat-form-field appearance="outline" class="alignment-field">
+                              <mat-label>Alignment</mat-label>
+                              <mat-select [ngModel]="block.style?.alignment" (ngModelChange)="onAlignmentChange(block, $event)">
+                                <mat-option value="left">Left</mat-option>
+                                <mat-option value="center">Center</mat-option>
+                                <mat-option value="right">Right</mat-option>
+                              </mat-select>
+                            </mat-form-field>
+                            <mat-form-field appearance="outline" class="weight-field">
+                              <mat-label>Font Weight</mat-label>
+                              <mat-select [ngModel]="block.style?.fontWeight" (ngModelChange)="onFontWeightChange(block, $event)">
+                                <mat-option value="normal">Normal</mat-option>
+                                <mat-option value="bold">Bold</mat-option>
+                              </mat-select>
+                            </mat-form-field>
+                            <mat-checkbox 
+                              [(ngModel)]="block.required" 
+                              (ngModelChange)="onRequiredToggle(block, $event)">
+                              Required
+                            </mat-checkbox>
+                          </div>
+                        </div>
+
+                        <!-- Text Block -->
+                        <div *ngIf="block.type === 'text'" class="block-editor">
+                          <mat-form-field appearance="outline" class="block-label-field">
+                            <mat-label>Block Label</mat-label>
+                            <input matInput [(ngModel)]="block.label" (ngModelChange)="updateBlock(block.id, {label: $event})">
+                          </mat-form-field>
+                          <mat-form-field appearance="outline" class="block-value-field">
+                            <mat-label>Text Content</mat-label>
+                            <textarea 
+                              matInput 
+                              [(ngModel)]="block.value" 
+                              (ngModelChange)="updateBlock(block.id, {value: $event})"
+                              rows="4">
+                            </textarea>
+                          </mat-form-field>
+                          <div class="block-options">
+                            <mat-form-field appearance="outline" class="alignment-field">
+                              <mat-label>Alignment</mat-label>
+                              <mat-select [ngModel]="block.style?.alignment" (ngModelChange)="onAlignmentChange(block, $event)">
+                                <mat-option value="left">Left</mat-option>
+                                <mat-option value="center">Center</mat-option>
+                                <mat-option value="right">Right</mat-option>
+                                <mat-option value="justify">Justify</mat-option>
+                              </mat-select>
+                            </mat-form-field>
+                            <mat-checkbox 
+                              [(ngModel)]="block.required" 
+                              (ngModelChange)="onRequiredToggle(block, $event)">
+                              Required
+                            </mat-checkbox>
+                          </div>
+                        </div>
+
+                        <!-- Date Block -->
+                        <div *ngIf="block.type === 'date'" class="block-editor">
+                          <mat-form-field appearance="outline" class="block-label-field">
+                            <mat-label>Date Label</mat-label>
+                            <input matInput [(ngModel)]="block.label" (ngModelChange)="updateBlock(block.id, {label: $event})">
+                          </mat-form-field>
+                          <mat-form-field appearance="outline" class="block-value-field">
+                            <mat-label>Date Value</mat-label>
+                            <input matInput [(ngModel)]="block.value" (ngModelChange)="updateBlock(block.id, {value: $event})">
+                          </mat-form-field>
+                          <div class="block-options">
+                            <mat-checkbox 
+                              [(ngModel)]="block.required" 
+                              (ngModelChange)="onRequiredToggle(block, $event)">
+                              Required
+                            </mat-checkbox>
+                          </div>
+                        </div>
+
+                        <!-- Number Block -->
+                        <div *ngIf="block.type === 'number'" class="block-editor">
+                          <mat-form-field appearance="outline" class="block-label-field">
+                            <mat-label>Number Label</mat-label>
+                            <input matInput [(ngModel)]="block.label" (ngModelChange)="updateBlock(block.id, {label: $event})">
+                          </mat-form-field>
+                          <mat-form-field appearance="outline" class="block-value-field">
+                            <mat-label>Number Value</mat-label>
+                            <input matInput type="number" [(ngModel)]="block.value" (ngModelChange)="updateBlock(block.id, {value: $event})">
+                          </mat-form-field>
+                          <div class="block-options">
+                            <mat-checkbox 
+                              [(ngModel)]="block.required" 
+                              (ngModelChange)="onRequiredToggle(block, $event)">
+                              Required
+                            </mat-checkbox>
+                          </div>
+                        </div>
+
+                        <!-- List Block -->
+                        <div *ngIf="block.type === 'list'" class="block-editor">
+                          <mat-form-field appearance="outline" class="block-label-field">
+                            <mat-label>List Label</mat-label>
+                            <input matInput [(ngModel)]="block.label" (ngModelChange)="updateBlock(block.id, {label: $event})">
+                          </mat-form-field>
+                          <div class="list-items">
+                            <div *ngFor="let item of block.items; let i = index" class="list-item">
+                              <mat-form-field appearance="outline" class="list-item-field">
+                                <mat-label>Item {{ i + 1 }}</mat-label>
+                                <input matInput [(ngModel)]="block.items![i]" (ngModelChange)="onListItemChange(block, i, $event)">
+                              </mat-form-field>
+                              <button mat-icon-button (click)="removeListItem(block, i)" color="warn">
+                                <mat-icon>remove_circle</mat-icon>
+                              </button>
+                            </div>
+                            <button mat-stroked-button (click)="addListItem(block)" class="add-item-btn">
+                              <mat-icon>add</mat-icon>
+                              Add Item
+                            </button>
+                          </div>
+                          <div class="block-options">
+                            <mat-checkbox 
+                              [(ngModel)]="block.required" 
+                              (ngModelChange)="onRequiredToggle(block, $event)">
+                              Required
+                            </mat-checkbox>
+                          </div>
+                        </div>
+
+                        <!-- Table Block -->
+                        <div *ngIf="block.type === 'table'" class="block-editor">
+                          <mat-form-field appearance="outline" class="block-label-field">
+                            <mat-label>Table Label</mat-label>
+                            <input matInput [(ngModel)]="block.label" (ngModelChange)="updateBlock(block.id, {label: $event})">
+                          </mat-form-field>
+                          <div class="table-editor">
+                            <div class="table-headers">
+                              <div *ngFor="let header of block.headers; let i = index" class="table-header">
+                                <mat-form-field appearance="outline" class="header-field">
+                                  <mat-label>Header {{ i + 1 }}</mat-label>
+                                  <input matInput [(ngModel)]="block.headers![i]" (ngModelChange)="onTableHeaderInput(block, i, $event)">
+                                </mat-form-field>
+                                <button mat-icon-button (click)="removeTableColumn(block, i)" color="warn">
+                                  <mat-icon>remove_circle</mat-icon>
+                                </button>
+                              </div>
+                              <button mat-stroked-button (click)="addTableColumn(block)" class="add-column-btn">
+                                <mat-icon>add</mat-icon>
+                                Add Column
+                              </button>
+                            </div>
+                            <div class="table-rows">
+                              <div *ngFor="let row of block.rows; let rowIndex = index" class="table-row">
+                                <div *ngFor="let cell of row; let cellIndex = index" class="table-cell">
+                                  <mat-form-field appearance="outline" class="cell-field">
+                                    <mat-label>Cell</mat-label>
+                                    <input matInput [(ngModel)]="block.rows![rowIndex][cellIndex]" (ngModelChange)="onTableCellInput(block, rowIndex, cellIndex, $event)">
+                                  </mat-form-field>
+                                </div>
+                                <button mat-icon-button (click)="removeTableRow(block, rowIndex)" color="warn">
+                                  <mat-icon>remove_circle</mat-icon>
+                                </button>
+                              </div>
+                              <button mat-stroked-button (click)="addTableRow(block)" class="add-row-btn">
+                                <mat-icon>add</mat-icon>
+                                Add Row
+                              </button>
+                            </div>
+                          </div>
+                          <div class="block-options">
+                            <mat-checkbox 
+                              [(ngModel)]="block.required" 
+                              (ngModelChange)="onRequiredToggle(block, $event)">
+                              Required
+                            </mat-checkbox>
+                          </div>
+                        </div>
+
+                        <!-- Signature Block -->
+                        <div *ngIf="block.type === 'signature'" class="block-editor">
+                          <mat-form-field appearance="outline" class="block-label-field">
+                            <mat-label>Signature Label</mat-label>
+                            <input matInput [(ngModel)]="block.label" (ngModelChange)="updateBlock(block.id, {label: $event})">
+                          </mat-form-field>
+                          <div class="signature-preview">
+                            <div class="signature-line"></div>
+                            <div class="signature-label">{{ block.value || 'Signature' }}</div>
+                          </div>
+                          <div class="block-options">
+                            <mat-checkbox 
+                              [(ngModel)]="block.required" 
+                              (ngModelChange)="onRequiredToggle(block, $event)">
+                              Required
+                            </mat-checkbox>
+                          </div>
+                        </div>
+
+                        <!-- Conditional Block -->
+                        <div *ngIf="block.type === 'conditional'" class="block-editor">
+                          <mat-form-field appearance="outline" class="block-label-field">
+                            <mat-label>Conditional Label</mat-label>
+                            <input matInput [(ngModel)]="block.label" (ngModelChange)="updateBlock(block.id, {label: $event})">
+                          </mat-form-field>
+                          <div class="conditional-editor">
+                            <mat-form-field appearance="outline" class="conditional-field">
+                              <mat-label>Field</mat-label>
+                              <input matInput [ngModel]="block.conditional?.field" (ngModelChange)="onConditionalFieldChange(block, $event)">
+                            </mat-form-field>
+                            <mat-form-field appearance="outline" class="conditional-field">
+                              <mat-label>Operator</mat-label>
+                              <mat-select [ngModel]="block.conditional?.operator" (ngModelChange)="onConditionalOperatorChange(block, $event)">
+                                <mat-option value="equals">Equals</mat-option>
+                                <mat-option value="not_equals">Not Equals</mat-option>
+                                <mat-option value="greater_than">Greater Than</mat-option>
+                                <mat-option value="less_than">Less Than</mat-option>
+                              </mat-select>
+                            </mat-form-field>
+                            <mat-form-field appearance="outline" class="conditional-field">
+                              <mat-label>Value</mat-label>
+                              <input matInput [ngModel]="block.conditional?.value" (ngModelChange)="onConditionalValueChange(block, $event)">
+                            </mat-form-field>
+                          </div>
+                          <mat-form-field appearance="outline" class="block-value-field">
+                            <mat-label>Conditional Text</mat-label>
+                            <textarea 
+                              matInput 
+                              [(ngModel)]="block.value" 
+                              (ngModelChange)="updateBlock(block.id, {value: $event})"
+                              rows="3">
+                            </textarea>
+                          </mat-form-field>
+                          <div class="block-options">
+                            <mat-checkbox 
+                              [(ngModel)]="block.required" 
+                              (ngModelChange)="onRequiredToggle(block, $event)">
+                              Required
+                            </mat-checkbox>
+                          </div>
+                        </div>
+
+                        <!-- Divider Block -->
+                        <div *ngIf="block.type === 'divider'" class="block-editor">
+                          <div class="divider-preview">
+                            <mat-divider></mat-divider>
+                          </div>
+                          <div class="block-options">
+                            <mat-checkbox 
+                              [(ngModel)]="block.required" 
+                              (ngModelChange)="onRequiredToggle(block, $event)">
+                              Required
+                            </mat-checkbox>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+            </div>
+
+            <div class="builder-preview" *ngIf="showPreview">
+              <mat-card class="preview-card">
+                <mat-card-header>
+                  <mat-card-title>Contract Preview</mat-card-title>
+                  <mat-card-subtitle>Live preview of your contract</mat-card-subtitle>
+                </mat-card-header>
+                <mat-card-content>
+                  <div class="contract-preview">
+                    <div class="contract-header">
+                      <h1>{{ metadata.partyA || 'Party A' }} - {{ metadata.partyB || 'Party B' }} Contract</h1>
+                      <p class="contract-meta">
+                        Effective Date: {{ metadata.effectiveDate ? (metadata.effectiveDate | date) : 'TBD' }} | 
+                        Value: {{ metadata.currency }} {{ metadata.contractValue | currency:'USD':'symbol':'1.2-2' }}
+                      </p>
+                    </div>
+                    <div class="contract-content">
+                      <div *ngFor="let block of blocks" class="preview-block">
+                        <div *ngIf="block.type === 'heading'" class="preview-heading">
+                          <h2>{{ block.label }}</h2>
+                        </div>
+                        <div *ngIf="block.type === 'text'" class="preview-text">
+                          <h3>{{ block.label }}</h3>
+                          <p>{{ block.value }}</p>
+                        </div>
+                        <div *ngIf="block.type === 'date'" class="preview-date">
+                          <label>{{ block.label }}:</label>
+                          <span>{{ block.value }}</span>
+                        </div>
+                        <div *ngIf="block.type === 'number'" class="preview-number">
+                          <label>{{ block.label }}:</label>
+                          <span>{{ block.value }}</span>
+                        </div>
+                        <div *ngIf="block.type === 'list'" class="preview-list">
+                          <h3>{{ block.label }}</h3>
+                          <ul>
+                            <li *ngFor="let item of block.items">{{ item }}</li>
+                          </ul>
+                        </div>
+                        <div *ngIf="block.type === 'table'" class="preview-table">
+                          <h3>{{ block.label }}</h3>
+                          <table>
+                            <thead>
+                              <tr>
+                                <th *ngFor="let header of block.headers">{{ header }}</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr *ngFor="let row of block.rows">
+                                <td *ngFor="let cell of row">{{ cell }}</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                        <div *ngIf="block.type === 'signature'" class="preview-signature">
+                          <div class="signature-line"></div>
+                          <div class="signature-label">{{ block.value || 'Signature' }}</div>
+                        </div>
+                        <div *ngIf="block.type === 'conditional'" class="preview-conditional">
+                          <p *ngIf="block.conditional">{{ block.value }}</p>
+                        </div>
+                        <div *ngIf="block.type === 'divider'" class="preview-divider">
+                          <mat-divider></mat-divider>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+            </div>
+          </div>
+        </div>
+      </mat-expansion-panel>
+
+      <!-- Customization Section -->
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>Customization</mat-panel-title>
+          <mat-panel-description>Customize the appearance and behavior of your contract</mat-panel-description>
+        </mat-expansion-panel-header>
+        <div class="tab-content">
+          <mat-card class="form-card">
+            <mat-card-header>
+              <mat-card-title>Contract Customization</mat-card-title>
+              <mat-card-subtitle>Customize the appearance and behavior of your contract</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <form [formGroup]="customizationForm" class="customization-form">
+                <div class="form-section">
+                  <h3>Theme</h3>
+                  <div class="form-row">
+                    <mat-form-field appearance="outline" class="half-width">
+                      <mat-label>Primary Color</mat-label>
+                      <input matInput type="color" formControlName="primaryColor">
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="half-width">
+                      <mat-label>Text Color</mat-label>
+                      <input matInput type="color" formControlName="textColor">
+                    </mat-form-field>
+                  </div>
+                  <div class="form-row">
+                    <mat-form-field appearance="outline" class="half-width">
+                      <mat-label>Background Color</mat-label>
+                      <input matInput type="color" formControlName="backgroundColor">
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="half-width">
+                      <mat-label>Font Family</mat-label>
+                      <mat-select formControlName="fontFamily">
+                        <mat-option *ngFor="let font of fontFamilies" [value]="font">
+                          {{ font }}
+                        </mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+                </div>
+
+                <div class="form-section">
+                  <h3>Typography</h3>
+                  <div class="form-row">
+                    <mat-form-field appearance="outline" class="half-width">
+                      <mat-label>Font Size</mat-label>
+                      <input matInput type="number" formControlName="fontSize" min="8" max="24">
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="half-width">
+                      <mat-label>Line Height</mat-label>
+                      <input matInput type="number" formControlName="lineHeight" min="1" max="3" step="0.1">
+                    </mat-form-field>
+                  </div>
+                </div>
+
+                <div class="form-section">
+                  <h3>Layout</h3>
+                  <div class="form-row">
+                    <mat-form-field appearance="outline" class="half-width">
+                      <mat-label>Margins (px)</mat-label>
+                      <input matInput type="number" formControlName="margins" min="0" max="100">
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="half-width">
+                      <mat-label>Spacing (px)</mat-label>
+                      <input matInput type="number" formControlName="spacing" min="0" max="50">
+                    </mat-form-field>
+                  </div>
+                  <div class="form-row">
+                    <mat-form-field appearance="outline" class="half-width">
+                      <mat-label>Page Size</mat-label>
+                      <mat-select formControlName="pageSize">
+                        <mat-option *ngFor="let size of pageSizes" [value]="size">
+                          {{ size }}
+                        </mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+                </div>
+
+                <div class="form-section">
+                  <h3>Features</h3>
+                  <div class="form-row">
+                    <mat-slide-toggle formControlName="showLineNumbers">
+                      Show Line Numbers
+                    </mat-slide-toggle>
+                    <mat-slide-toggle formControlName="trackChanges">
+                      Track Changes
+                    </mat-slide-toggle>
+                    <mat-slide-toggle formControlName="autoSave">
+                      Auto Save
+                    </mat-slide-toggle>
+                  </div>
+                </div>
+              </form>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button 
+        mat-stroked-button 
+        (click)="onReset()" 
+        [disabled]="isSaving">
+        Reset
+      </button>
+      
+      <div class="spacer"></div>
+      
+      <button 
+        mat-stroked-button 
+        (click)="saveDraft()" 
+        [disabled]="isSaving"
+        [class.loading]="isSaving">
+        <mat-icon *ngIf="!isSaving">save</mat-icon>
+        <mat-spinner *ngIf="isSaving" diameter="20"></mat-spinner>
+        {{ isSaving ? 'Saving...' : 'Save Draft' }}
+      </button>
+      
+      <button 
+        mat-raised-button 
+        color="primary" 
+        (click)="submitForApproval()" 
+        [disabled]="isSaving"
+        [class.loading]="isSaving">
+        <mat-icon *ngIf="!isSaving">send</mat-icon>
+        <mat-spinner *ngIf="isSaving" diameter="20"></mat-spinner>
+        {{ isSaving ? 'Submitting...' : 'Submit for Approval' }}
+      </button>
+      
+      <button 
+        mat-stroked-button 
+        (click)="exportToPDF()" 
+        [disabled]="isSaving">
+        <mat-icon>picture_as_pdf</mat-icon>
+        Export PDF
+      </button>
+      
+      <button 
+        mat-stroked-button 
+        (click)="exportToHTML()" 
+        [disabled]="isSaving">
+        <mat-icon>code</mat-icon>
+        Export HTML
+      </button>
+      
+      <button 
+        mat-stroked-button 
+        (click)="exportToDOCX()" 
+        [disabled]="isSaving">
+        <mat-icon>description</mat-icon>
+        Export DOCX
+      </button>
+      
+      <button 
+        mat-stroked-button 
+        (click)="print()" 
+        [disabled]="isSaving">
+        <mat-icon>print</mat-icon>
+        Print
+      </button>
+    </div>
+  </div>
+</div>

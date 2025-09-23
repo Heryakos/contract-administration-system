@@ -33,6 +33,7 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatSortModule } from '@angular/material/sort';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { FormsModule } from '@angular/forms';
 
 import { ContractGeneratorComponent } from './contract-generator/contract-generator.component';
 import { ContractsGeneratorRoutingModule } from './contracts-generator-routing.module';
@@ -43,6 +44,7 @@ import { ContractsGeneratorRoutingModule } from './contracts-generator-routing.m
   ],
   imports: [
     CommonModule,
+    FormsModule,
     ContractsGeneratorRoutingModule,
     ReactiveFormsModule,
     DragDropModule,

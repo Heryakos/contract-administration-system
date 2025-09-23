@@ -1,0 +1,25 @@
+<div class="template-generator">
+  <h2>Template Generator</h2>
+  <form [formGroup]="templateForm">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Template Name</mat-label>
+      <input matInput formControlName="templateName" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Description</mat-label>
+      <textarea matInput formControlName="templateDescription"></textarea>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Category</mat-label>
+      <mat-select formControlName="templateCategory">
+        <mat-option *ngFor="let c of categories" [value]="c">{{ c }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <button mat-raised-button color="primary" [disabled]="templateForm.invalid || isSaving">
+      Save Template
+    </button>
+  </form>
+</div> 
