@@ -44,8 +44,23 @@ export class ConService {
 
   getCurrentUserGuid(): string | null {
     const emp = this.currentEmployeeSubject.value;
-    // The new API response is a direct employee object, not wrapped in c_Employees
-    return emp?.user_ID ?? emp?.employee_Id ?? null;
+    // Try direct object
+    if (emp && typeof emp === 'object' && !Array.isArray(emp)) {
+      const direct = emp?.user_ID ?? emp?.employee_Id ?? null;
+      if (direct) return direct;
+    }
+    // Try array shape: use first element
+    if (Array.isArray(emp) && emp.length > 0) {
+      const first = emp[0];
+      const arrVal = first?.user_ID ?? first?.employee_Id ?? null;
+      if (arrVal) return arrVal;
+    }
+    // Try old wrapped format { c_Employees: [...] }
+    if (emp?.c_Employees && Array.isArray(emp.c_Employees) && emp.c_Employees.length > 0) {
+      const firstEmp = emp.c_Employees[0];
+      return firstEmp?.user_ID ?? firstEmp?.employee_Id ?? null;
+    }
+    return null;
   }
 
   // HRA Employee endpoint
@@ -79,101 +94,106 @@ export class ConService {
     let hp = new HttpParams()
     if (params?.search) hp = hp.set("search", params.search)
     if (params?.status) hp = hp.set("status", params.status)
-    return this.http.get<Contract[]>(`${this.API}/CON_contracts`, { params: hp })
+    return this.http.get<Contract[]>(`${this.API}/CON_Contracts`, { params: hp })
   }
   getContract(id: string | number): Observable<Contract> {
-    return this.http.get<Contract>(`${this.API}/CON_contracts/${id}`)
+    return this.http.get<Contract>(`${this.API}/CON_Contracts/${id}`)
+  }
+
+  submitForApproval(contractId: number, dto: { submittedByUserID: string; modificationNotes?: string }): Observable<void> {
+    return this.http.post<void>(`${this.API}/CON_Contracts/${contractId}/submit-approval`, dto);
   }
   // Document endpoints
   getContractDocuments(contractId: number): Observable<ContractDocument[]> {
-    return this.http.get<ContractDocument[]>(`${this.API}/CON_contracts/${contractId}/documents`)
+    return this.http.get<ContractDocument[]>(`${this.API}/CON_Contracts/${contractId}/documents`)
   }
   uploadContractDocument(contractId: number, file: File, uploadedByUserId?: string): Observable<ContractDocument> {
     const form = new FormData()
     form.append("file", file)
     if (uploadedByUserId) form.append("uploadedByUserID", uploadedByUserId)
-    return this.http.post<ContractDocument>(`${this.API}/CON_contracts/${contractId}/documents`, form)
+    return this.http.post<ContractDocument>(`${this.API}/CON_Contracts/${contractId}/documents`, form)
   }
   deleteContractDocument(contractId: number, documentId: number): Observable<void> {
-    return this.http.delete<void>(`${this.API}/CON_contracts/${contractId}/documents/${documentId}`)
+    return this.http.delete<void>(`${this.API}/CON_Contracts/${contractId}/documents/${documentId}`)
   }
+
   createContract(payload: CreateContract): Observable<any> {
-    return this.http.post(`${this.API}/CON_contracts`, payload)
+    return this.http.post(`${this.API}/CON_Contracts`, payload)
   }
   updateContract(id: string | number, payload: UpdateContract): Observable<void> {
-    return this.http.put<void>(`${this.API}/CON_contracts/${id}`, payload as any)
+    return this.http.put<void>(`${this.API}/CON_Contracts/${id}`, payload as any)
   }
   deleteContract(id: string | number): Observable<void> {
-    return this.http.delete<void>(`${this.API}/CON_contracts/${id}`)
+    return this.http.delete<void>(`${this.API}/CON_Contracts/${id}`)
   }
   getContractSummary(): Observable<ContractSummary> {
     return this.http.get<ContractSummary>(`${this.API}/CON_Contracts/contract-summary`)
   }
   getVendors(): Observable<Vendor[]> {
-    return this.http.get<Vendor[]>(`${this.API}/CON_contracts/vendors`)
+    return this.http.get<Vendor[]>(`${this.API}/CON_Contracts/vendors`)
   }
   getContractTypes(): Observable<ContractType[]> {
-    return this.http.get<ContractType[]>(`${this.API}/CON_contracts/types`)
+    return this.http.get<ContractType[]>(`${this.API}/CON_Contracts/types`)
   }
   getContractCategories(): Observable<ContractCategory[]> {
-    return this.http.get<ContractCategory[]>(`${this.API}/CON_contracts/categories`)
+    return this.http.get<ContractCategory[]>(`${this.API}/CON_Contracts/categories`)
   }
 
   // Financial
   getFinancialSummary(): Observable<FinancialSummary> {
-    return this.http.get<FinancialSummary>(`${this.API}/CON_financial/financial-summary`)
+    return this.http.get<FinancialSummary>(`${this.API}/CON_Financial/financial-summary`)
   }
   getPaymentSchedulesByContract(contractId: number): Observable<PaymentSchedule[]> {
-    return this.http.get<PaymentSchedule[]>(`${this.API}/CON_financial/payment-schedules/contract/${contractId}`)
+    return this.http.get<PaymentSchedule[]>(`${this.API}/CON_Financial/payment-schedules/contract/${contractId}`)
   }
   getUpcomingPayments(days = 30): Observable<PaymentSchedule[]> {
-    return this.http.get<PaymentSchedule[]>(`${this.API}/CON_financial/payment-schedules/upcoming`, { params: new HttpParams().set("days", String(days)) })
+    return this.http.get<PaymentSchedule[]>(`${this.API}/CON_Financial/payment-schedules/upcoming`, { params: new HttpParams().set("days", String(days)) })
   }
   createPaymentSchedule(schedule: any): Observable<PaymentSchedule> {
-    return this.http.post<PaymentSchedule>(`${this.API}/CON_financial/payment-schedules`, schedule)
+    return this.http.post<PaymentSchedule>(`${this.API}/CON_Financial/payment-schedules`, schedule)
   }
   updatePaymentSchedule(id: number, schedule: any): Observable<void> {
-    return this.http.put<void>(`${this.API}/CON_financial/payment-schedules/${id}`, schedule)
+    return this.http.put<void>(`${this.API}/CON_Financial/payment-schedules/${id}`, schedule)
   }
   deletePaymentSchedule(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.API}/CON_financial/payment-schedules/${id}`)
+    return this.http.delete<void>(`${this.API}/CON_Financial/payment-schedules/${id}`)
   }
   getInvoices(status?: string): Observable<Invoice[]> {
     const params = status ? new HttpParams().set("status", status) : undefined
-    return this.http.get<Invoice[]>(`${this.API}/CON_financial/invoices`, { params })
+    return this.http.get<Invoice[]>(`${this.API}/CON_Financial/invoices`, { params })
   }
   getInvoice(id: number): Observable<Invoice> {
-    return this.http.get<Invoice>(`${this.API}/CON_financial/invoices/${id}`)
+    return this.http.get<Invoice>(`${this.API}/CON_Financial/invoices/${id}`)
   }
   createInvoice(invoice: any): Observable<Invoice> {
-    return this.http.post<Invoice>(`${this.API}/CON_financial/invoices`, invoice)
+    return this.http.post<Invoice>(`${this.API}/CON_Financial/invoices`, invoice)
   }
-  approveInvoice(id: number, approvedBy: number): Observable<any> {
-    return this.http.post(`${this.API}/CON_financial/invoices/${id}/approve`, approvedBy)
+  approveInvoice(id: number, approvedBy: string): Observable<any> {
+    return this.http.post(`${this.API}/CON_Financial/invoices/${id}/approve`, approvedBy)
   }
-  rejectInvoice(id: number, rejectedBy: number): Observable<any> {
-    return this.http.post(`${this.API}/CON_financial/invoices/${id}/reject`, rejectedBy)
+  rejectInvoice(id: number, rejectedBy: string): Observable<any> {
+    return this.http.post(`${this.API}/CON_Financial/invoices/${id}/reject`, rejectedBy)
   }
   markInvoicePaid(id: number): Observable<any> {
-    return this.http.post(`${this.API}/CON_financial/invoices/${id}/mark-paid`, {})
+    return this.http.post(`${this.API}/CON_Financial/invoices/${id}/mark-paid`, {})
   }
 
   // Approvals
   getPendingApprovals(userGuid: string): Observable<PendingApproval[]> {
-    return this.http.get<PendingApproval[]>(`${this.API}/CON_approvals/pending/${userGuid}`);
+    return this.http.get<PendingApproval[]>(`${this.API}/CON_Approvals/pending/${userGuid}`);
   }
 
   getContractApprovalStatus(contractId: number): Observable<ContractApprovalStatus> {
-    return this.http.get<ContractApprovalStatus>(`${this.API}/CON_approvals/contract/${contractId}/current`)
+    return this.http.get<ContractApprovalStatus>(`${this.API}/CON_Approvals/contract/${contractId}/current`)
   }
   submitContractForApproval(contractId: number, comments?: string): Observable<any> {
-    return this.http.post(`${this.API}/CON_approvals/contract/${contractId}/submit`, { comments })
+    return this.http.post(`${this.API}/CON_Approvals/contract/${contractId}/submit`, { comments })
   }
   approveStep(approvalId: number, request: any): Observable<any> {
-    return this.http.post(`${this.API}/CON_approvals/approve/${approvalId}`, request)
+    return this.http.post(`${this.API}/CON_Approvals/approve/${approvalId}`, request)
   }
   rejectStep(approvalId: number, request: any): Observable<any> {
-    return this.http.post(`${this.API}/CON_approvals/reject/${approvalId}`, request)
+    return this.http.post(`${this.API}/CON_Approvals/reject/${approvalId}`, request)
   }
 
   // Risks & Compliance
@@ -182,32 +202,32 @@ export class ConService {
     if (params?.contractId) hp = hp.set("contractId", String(params.contractId))
     if (params?.category) hp = hp.set("category", params.category)
     if (params?.status) hp = hp.set("status", params.status)
-    return this.http.get<Risk[]>(`${this.API}/CON_riskcompliance/risks`, { params: hp })
+    return this.http.get<Risk[]>(`${this.API}/CON_RiskCompliance/risks`, { params: hp })
   }
   getRisk(id: number): Observable<Risk> {
-    return this.http.get<Risk>(`${this.API}/CON_riskcompliance/risks/${id}`)
+    return this.http.get<Risk>(`${this.API}/CON_RiskCompliance/risks/${id}`)
   }
   createRisk(risk: any): Observable<Risk> {
-    return this.http.post<Risk>(`${this.API}/CON_riskcompliance/risks`, risk)
+    return this.http.post<Risk>(`${this.API}/CON_RiskCompliance/risks`, risk)
   }
   updateRisk(id: number, risk: any): Observable<void> {
-    return this.http.put<void>(`${this.API}/CON_riskcompliance/risks/${id}`, risk)
+    return this.http.put<void>(`${this.API}/CON_RiskCompliance/risks/${id}`, risk)
   }
   getComplianceRequirements(params?: { contractId?: number; type?: string; status?: string }): Observable<ComplianceRequirement[]> {
     let hp = new HttpParams()
     if (params?.contractId) hp = hp.set("contractId", String(params.contractId))
     if (params?.type) hp = hp.set("type", params.type)
     if (params?.status) hp = hp.set("status", params.status)
-    return this.http.get<ComplianceRequirement[]>(`${this.API}/CON_riskcompliance/compliance`, { params: hp })
+    return this.http.get<ComplianceRequirement[]>(`${this.API}/CON_RiskCompliance/compliance`, { params: hp })
   }
   getComplianceRequirement(id: number): Observable<ComplianceRequirement> {
-    return this.http.get<ComplianceRequirement>(`${this.API}/CON_riskcompliance/compliance/${id}`)
+    return this.http.get<ComplianceRequirement>(`${this.API}/CON_RiskCompliance/compliance/${id}`)
   }
   createComplianceRequirement(req: any): Observable<ComplianceRequirement> {
-    return this.http.post<ComplianceRequirement>(`${this.API}/CON_riskcompliance/compliance`, req)
+    return this.http.post<ComplianceRequirement>(`${this.API}/CON_RiskCompliance/compliance`, req)
   }
   updateComplianceRequirement(id: number, req: any): Observable<void> {
-    return this.http.put<void>(`${this.API}/CON_riskcompliance/compliance/${id}`, req)
+    return this.http.put<void>(`${this.API}/CON_RiskCompliance/compliance/${id}`, req)
   }
 
   // Obligations
@@ -217,26 +237,46 @@ export class ConService {
     if (params?.type) hp = hp.set("type", params.type)
     if (params?.status) hp = hp.set("status", params.status)
     if (params?.dueWithinDays) hp = hp.set("dueWithinDays", String(params.dueWithinDays))
-    return this.http.get<any[]>(`${this.API}/CON_ObligationsReports/obligations`, { params: hp })
+    return this.http.get<any[]>(`${this.API}/CON_obligationsReports/obligations`, { params: hp })
   }
   getObligation(id: number): Observable<any> {
-    return this.http.get<any>(`${this.API}/CON_ObligationsReports/obligations/${id}`)
+    return this.http.get<any>(`${this.API}/CON_obligationsReports/obligations/${id}`)
   }
   createObligation(payload: any): Observable<{ obligationId: number }> {
-    return this.http.post<{ obligationId: number }>(`${this.API}/CON_ObligationsReports/obligations`, payload)
+    return this.http.post<{ obligationId: number }>(`${this.API}/CON_obligationsReports/obligations`, payload)
   }
   updateObligation(id: number, payload: any): Observable<void> {
-    return this.http.put<void>(`${this.API}/CON_ObligationsReports/obligations/${id}`, payload)
+    return this.http.put<void>(`${this.API}/CON_obligationsReports/obligations/${id}`, payload)
   }
   deleteObligation(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.API}/CON_ObligationsReports/obligations/${id}`)
+    return this.http.delete<void>(`${this.API}/CON_obligationsReports/obligations/${id}`)
   }
   getObligationsDashboard(): Observable<any> {
-    return this.http.get<any>(`${this.API}/CON_ObligationsReports/obligations/dashboard`)
+    return this.http.get<any>(`${this.API}/CON_obligationsReports/obligations/dashboard`)
   }
 
   // Reports
   getReportsDashboard(): Observable<any> {
-    return this.http.get<any>(`${this.API}/CON_ObligationsReports/reports/dashboard`)
+    return this.http.get<any>(`${this.API}/CON_obligationsReports/reports/dashboard`)
+  }
+
+  // Approval Center (Unified)
+  getUnifiedPending(approverGuid: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.API}/CON_ApprovalCenter/pending/${approverGuid}`)
+  }
+  getUnifiedItemDetails(workflowId: number): Observable<any> {
+    return this.http.get<any>(`${this.API}/CON_ApprovalCenter/item/${workflowId}`)
+  }
+  approvalCenterApprove(stepId: number, approverGuid: string, comments?: string): Observable<any> {
+    return this.http.post(`${this.API}/CON_ApprovalCenter/steps/${stepId}/approve`, {
+      approverUserID: approverGuid,
+      comments: comments
+    })
+  }
+  approvalCenterReject(stepId: number, approverGuid: string, comments: string): Observable<any> {
+    return this.http.post(`${this.API}/CON_ApprovalCenter/steps/${stepId}/reject`, {
+      approverUserID: approverGuid,
+      comments: comments
+    })
   }
 }
